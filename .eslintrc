@@ -1,0 +1,100 @@
+{
+  "extends": [
+    "eslint:recommended",
+    "plugin:react/recommended",
+    "plugin:@typescript-eslint/recommended"
+  ],
+  "plugins": [
+    "import"
+  ],
+  "env": {
+    "es6": true
+  },
+  "overrides": [
+    {
+      "files": [
+        "examples/demo/**/*.{js,jsx,ts,tsx}",
+        "fure-view/**/*.{js,jsx,ts,tsx}"
+      ],
+      "env": {
+        "browser": true
+      }
+    },
+    {
+      "files": [
+        "fure-core/**/*.{js,ts}",
+        "fure-main/**/*.{js,ts}"
+      ],
+      "env": {
+        "node": true
+      }
+    }
+  ],
+  "rules": {
+    "quotes": [
+      "error",
+      "single"
+    ],
+    "prefer-template": "error",
+    "eol-last": "error",
+    "curly": [
+      "error",
+      "multi-line"
+    ],
+    "no-duplicate-imports": "error",
+    "no-warning-comments": [
+      "warn",
+      {
+        "terms": [
+          "todo",
+          "fixme"
+        ],
+        "location": "start"
+      }
+    ],
+    "semi": "error",
+    "no-extra-semi": "error",
+    "comma-dangle": [
+      "error",
+      "always-multiline"
+    ],
+    "no-var": "error",
+    "no-unused-vars": "off",
+    "@typescript-eslint/no-unused-vars": [
+      "error",
+      {
+        "varsIgnorePattern": "^_",
+        "argsIgnorePattern": "^_"
+      }
+    ],
+    "indent": "off",
+    "no-confusing-arrow": [
+      "error",
+      {
+        "allowParens": true
+      }
+    ],
+    "import/no-extraneous-dependencies": "error",
+    "sort-imports": [
+      "error",
+      {
+        "ignoreDeclarationSort": true
+      }
+    ],
+    "@typescript-eslint/explicit-function-return-type": [
+      "error",
+      {
+        "allowExpressions": true
+      }
+    ],
+    "@typescript-eslint/indent": [
+      "error",
+      2
+    ]
+  },
+  "settings": {
+    "react": {
+      "version": "detected"
+    }
+  }
+}

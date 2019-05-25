@@ -1,0 +1,40 @@
+{
+  "name": "fure-core",
+  "version": "0.0.0",
+  "description": "Functional Reactive Game Framework (core)",
+  "keywords": [
+    "furegame",
+    "functional",
+    "reactive",
+    "game",
+    "framework",
+    "engine"
+  ],
+  "author": "zhengxiaoyao0716 <1499383852@qq.com>",
+  "homepage": "https://github.com/zhengxiaoyao0716/furegame#readme",
+  "license": "MIT",
+  "main": "lib/index.js",
+  "directories": {
+    "lib": "lib",
+    "test": "__tests__"
+  },
+  "files": [
+    "lib"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/zhengxiaoyao0716/furegame.git"
+  },
+  "scripts": {
+    "test": "echo \"Error: run tests from root\" && exit 1"
+  },
+  "bugs": {
+    "url": "https://github.com/zhengxiaoyao0716/furegame/issues"
+  },
+  "devDependencies": {
+    "rxjs": "^6.5.2"
+  },
+  "peerDependencies": {
+    "rxjs": "^6.5.2"
+  }
+}

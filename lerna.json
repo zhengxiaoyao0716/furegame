@@ -1,0 +1,11 @@
+{
+  "packages": [
+    "fure-core",
+    "fure-main",
+    "fure-view",
+    "examples/*"
+  ],
+  "version": "0.0.0",
+  "npmClient": "yarn",
+  "useWorkspaces": true
+}

@@ -1,0 +1,18 @@
+{
+    "eslint.validate": [
+        "javascript",
+        "javascriptreact",
+        {
+            "language": "typescript",
+            "autoFix": true
+        },
+        {
+            "language": "typescriptreact",
+            "autoFix": true
+        }
+    ],
+    "eslint.autoFixOnSave": true,
+    "javascript.validate.enable": false,
+    "typescript.suggestionActions.enabled": false,
+    "editor.tabSize": 2
+}
