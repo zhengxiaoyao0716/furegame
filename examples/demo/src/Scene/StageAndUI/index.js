@@ -1,26 +1,53 @@
-import React from 'react';
-import { Loader, Renderer, Stage, Ticker, UI } from 'fure-view';
+import React, { ReactNode, useState } from 'react';
+import { App, Loader, Renderer, Stage, Ticker, UI } from 'fure-view';
 import './index.css';
+import { useSelect } from '../helper';
 
-const StageAndUI = () => {
-  return (
-    // <App {...App.Creator({ width: 1920, height: 1080 })}>
-    //   <Stage.TickRefresh />
-    //   <UI></UI>
-    // </App>
-    <Loader>
-      <Renderer id="game" {...Renderer.Creator({ width: 1920, height: 1080, backgroundColor: 0x66ccff })}>
-        <Stage>
-          <Ticker>
-            <Stage.TickRefresh />
-          </Ticker>
-        </Stage>
+const usages = {
+  Simple({ children }: { children: ReactNode }) {
+    return (
+      // `App` == `Loader` + `Renderer` + `Stage` + `Ticker` + `Stage.TickRefresh`
+      <App id="game" {...App.Creator({ width: 1920, height: 1080, backgroundColor: 0x66ccff })}>
         <UI id="hello">
           <h2>HELLO</h2>
           <h1>Fure Game</h1>
+          <h3>(simple usage)</h3>
         </UI>
-      </Renderer>
-    </Loader>
+        {children}
+      </App>
+    );
+  },
+  Advance({ children }: { children: ReactNode }) {
+    return (
+      <Loader> {/* `Loader` is optional */}
+        <Renderer id="game" {...Renderer.Creator({ width: 1920, height: 1080, backgroundColor: 0x66ccff })}>
+          <Stage>
+            <Ticker> {/* `Ticker` is optional */}
+              <Stage.TickRefresh />
+            </Ticker>
+          </Stage>
+          <UI id="hello" scaleMode={true}>
+            <h2>HELLO</h2>
+            <h1>Fure Game</h1>
+            <h3>(advance usage)</h3>
+          </UI>
+          {children}
+        </Renderer>
+      </Loader>
+    );
+  },
+};
+
+const StageAndUI = () => {
+  const [usage, usageSelector] = useSelect('Simple');
+  const Usage = usages[usage];
+  return (
+    <Usage>
+      <UI id="helper">
+        <p {...usageSelector('Simple')}>Simple Usage</p>
+        <p {...usageSelector('Advance')}>Advance Usage</p>
+      </UI>
+    </Usage>
   );
 };
 StageAndUI.displayName = 'StageAndUI';

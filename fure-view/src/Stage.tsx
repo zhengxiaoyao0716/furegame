@@ -20,16 +20,20 @@ export const useStage = useContainer;
 
 /** `LazyRefresh` would refresh the `stage` only if the node was re-rendered. */
 Stage.LazyRefresh = () => {
-  const stage = useStage();
+  const stage = useStage() as PIXI.Container & { refresh?: () => void };
   const renderer = useRenderer();
   const ticker = useTicker();
-  const refresh = useCallback(() => renderer.render(stage), []);
-  ticker ? ticker.addOnce(refresh) : refresh();
+  stage.refresh && ticker.remove(stage.refresh);
+  stage.refresh = useCallback(() => {
+    renderer.render(stage);
+    stage.refresh = undefined;
+  }, []);
+  ticker.addOnce(stage.refresh);
   return null;
 };
 (Stage.LazyRefresh as any).displayName = 'Stage.LazyRefresh'; // eslint-disable-line @typescript-eslint/no-explicit-any
 
-/** `TickRefresh` would re-render each time the ticker frame updated. */
+/** `TickRefresh` would refresh the `stage` each time the ticker frame updated. */
 Stage.TickRefresh = () => {
   const stage = useStage();
   const renderer = useRenderer();
