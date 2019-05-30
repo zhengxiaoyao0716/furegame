@@ -39,8 +39,7 @@ const usages = {
 };
 
 const StageAndUI = () => {
-  const [usage, usageSelector] = useSelect('Simple');
-  const Usage = usages[usage];
+  const [Usage, usageSelector] = useSelect('Simple', usages);
   return (
     <Usage>
       <UI id="helper">

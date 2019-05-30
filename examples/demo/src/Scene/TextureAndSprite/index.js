@@ -72,8 +72,7 @@ const usages = {
 };
 
 const TextureAndSprite = () => {
-  const [usage, usageSelector] = useSelect('Simple');
-  const Usage = usages[usage];
+  const [Usage, usageSelector] = useSelect('Simple', usages);
   return (
     <Renderer {...Renderer.Creator(options)}>
       <Stage>

@@ -2,9 +2,7 @@ import { AnimatedSprite, AnimatedSpriteProps } from '.';
 import * as PIXI from 'pixi.js';
 import { ReactElement } from 'react';
 
-type ProtoExntends<T, U> = U & {
-  [P in Exclude<keyof T, keyof U>]: T[P];
-};
+type ProtoExntends<T, U> = U & { [P in Exclude<keyof T, keyof U>]: T[P]; };
 
 interface MovableSpritePropsExtends {
   animId: string | ((velocity: { vx: number; vy: number }) => string);
