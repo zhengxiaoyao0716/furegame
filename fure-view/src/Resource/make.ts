@@ -1,44 +1,136 @@
-interface THColor {
-  /**   0x123DEF   */value: number;
-  /**  base64 uri  */data: string;
-  /**   "123def"   */color: string;
-  /**   "#123DEF"  */hex: string;
-  rgb: { R: number; G: number; B: number };
-  alpha: number;
-  rgba: { R: number; G: number; B: number; A: number };
-}
+import * as PIXI from 'pixi.js';
+import { LoaderOptions } from '../Loader';
+import { defaultClose } from '../hooks';
 
-const newColor = (value: number, data: string): THColor => {
-  const color = value.toString(16);
-  if (value > 0xFFFFFFFF) throw new Error(`color value overflow: ${color}`);
-  const hex = `#${color.toUpperCase()}`;
-  const R = value / 0x01000000 | 0;
-  const G = (value / 0x00010000 | 0) % 0x100;
-  const B = (value & 0x0000FF00) >> 8;
-  const A = value & 0x000000FF;
-  return {
-    value, data, color, hex,
-    rgb: { R, G, B }, alpha: A, rgba: { R, G, B, A },
-  };
+//#region fix fuck type
+const Resource = PIXI.LoaderResource as { new(name: string, url: string | string[], options?: LoaderOptions): PIXI.LoaderResource };
+const Polygon = PIXI.Polygon as { new(...points: (PIXI.Point | number[])[]): PIXI.Polygon };
+type Shape = Parameters<PIXI.Graphics['drawShape']>[0];
+//#endregion
+
+export const makeResource = {
+  maker: undefined as PIXI.Renderer | undefined,
+  draw(object: PIXI.DisplayObject, close: (object: PIXI.DisplayObject) => void = defaultClose) {
+    if (this.maker == null) {
+      this.maker = new PIXI.Renderer({ width: 0, height: 0, transparent: true });
+      console.warn('[Furegame]: used `makeResource` to generate temporary resources, not recommand for production envriroments.'); // eslint-disable-line no-console
+    }
+    const { maker } = this; // lazy init the maker once it was used.
+    const { width, height } = object.getBounds();
+
+    // renderer the object
+    maker.view.width = width;
+    maker.view.height = height;
+    maker.render(object);
+
+    // generate texture
+    const image = new Image();
+    image.src = maker.view.toDataURL();
+    const texture = new PIXI.Texture(new PIXI.BaseTexture(image));
+
+    // clean the renderer
+    maker.clear();
+    maker.view.width = 0;
+    maker.view.height = 0;
+
+    close(object);
+
+    return (id?: string, loader?: PIXI.Loader) => {
+      if (id) {
+        if (loader) {
+          const resource = new Resource(id, `#${id}`);
+          loader.resources[id] = resource;
+          resource.texture = texture;
+        }
+        PIXI.Texture.addToCache(texture, id);
+      }
+      return texture;
+    };
+  },
+  shape: (
+    { fill, line }: {
+      fill?: {
+        color?: number;
+        alpha?: number;
+      };
+      line?: { width?: number; color?: number; alpha?: number };
+    } = {},
+  ) => {
+    const border = (line && line.width) ? 2 * line.width : 0;
+    return {
+      draw: (shape: Shape | ((graphics: PIXI.Graphics) => void)) => {
+        const graphics = new PIXI.Graphics();
+        fill ? graphics.beginFill(fill.color, fill.alpha) : graphics.beginFill(0x000000);
+        line && graphics.lineStyle(line.width, line.color, line.alpha);
+        if (shape instanceof Function) {
+          shape(graphics);
+        } else {
+          graphics.drawShape(shape);
+        }
+        return makeResource.draw(graphics);
+      },
+      circle(radius: number) {
+        return this.draw(new PIXI.Circle(border + radius, border + radius, radius));
+      },
+      ellipse(width: number, height: number) {
+        return this.draw(new PIXI.Ellipse(border + width, border + height, width, height));
+      },
+      polygon(...points: PIXI.Point[]) {
+        return this.draw(new Polygon(...points));
+      },
+      rectangle(width: number, height: number) {
+        return this.draw(new PIXI.Rectangle(border, border, width, height));
+      },
+      roundedRectangle(width: number, height: number, radius?: number) {
+        return this.draw(new PIXI.RoundedRectangle(border, border, width, height, radius));
+      },
+      triangle(width: number, height: number, sharp: number) {
+        return this.draw(new Polygon(new PIXI.Point(border + sharp, border), new PIXI.Point(border, border + height), new PIXI.Point(border + width, border + height)));
+      },
+      star(points: number, radius: number, innerRadius?: number, rotation?: number) {
+        return this.draw(graphics => graphics.drawStar(border + radius, border + radius, points, radius, innerRadius, rotation));
+      },
+    };
+  },
+  text: (value: string, style?: PIXI.TextStyle) => makeResource.draw(new PIXI.Text(value, style)),
+  // spritesheet: () => {
+  //     const canvas = document.createElement('canvas');
+  //     // TODO draw spritesheet.
+  //     const baseTexture = BaseTexture.fromCanvas(canvas);
+  //     const data = {};
+
+  //     const spritesheet = new Spritesheet(baseTexture, data);
+  //     return (id?: string, loader?: loaders.Loader) => {
+  //         if (id) {
+  //             if (loader) {
+  //                 const resource = new loaders.Resource(id, `#${id}`);
+  //                 loader.resources[id] = resource;
+  //                 resource.spritesheet = spritesheet;
+  //             }
+  //         }
+  //         return spritesheet;
+  //     };
+  // },
 };
 
-export const THColors = {
-  /** red */
-  Reimu: newColor(0xCB1B45ff, 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAgAAAAICAYAAADED76LAAAAE0lEQVQoU2M8Le36nwEPYBwZCgDiuxFZv0b9QAAAAABJRU5ErkJggg=='),
-  /** black */
-  Marisa: newColor(0x1C1C1Cff, 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAgAAAAICAYAAADED76LAAAAE0lEQVQoU2OUkZH5z4AHMI4MBQAGEgqh6nJAewAAAABJRU5ErkJggg=='),
-  /** yellow */
-  Alice: newColor(0xE98B2Aff, 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAgAAAAICAYAAADED76LAAAAE0lEQVQoU2N82a31nwEPYBwZCgDzHRTxpXyovQAAAABJRU5ErkJggg=='),
-  /** baka */
-  Cirno: newColor(0x58B2DCff, 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAgAAAAICAYAAADED76LAAAAFElEQVQoU2OM2HTnPwMewDgyFAAAMsMXMXWBeqIAAAAASUVORK5CYII='),
-  /** white */
-  Sakuya: newColor(0xFCFAF2ff, 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAgAAAAICAYAAADED76LAAAAFElEQVQoU2P88+vTfwY8gHFkKAAA1JcfQVtkt10AAAAASUVORK5CYII='),
-  /** green */
-  Youmu: newColor(0x227D51ff, 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAgAAAAICAYAAADED76LAAAAE0lEQVQoU2NUqg38z4AHMI4MBQDO6A+BFQpJiAAAAABJRU5ErkJggg=='),
-  /** sakura */
-  Yuyuko: newColor(0xFEDFE1ff, 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAgAAAAICAYAAADED76LAAAAFElEQVQoU2P8d//hfwY8gHFkKAAAFOcd8YzlO0MAAAAASUVORK5CYII='),
-  /** purple */
-  Yakumo: newColor(0x4A225Dff, 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAgAAAAICAYAAADED76LAAAAE0lEQVQoU2P0Uor9z4AHMI4MBQAdPA5J0HdVbgAAAABJRU5ErkJggg=='),
-};
-
-export { Texture } from 'pixi.js';
+// type SpritesheetFrameData = {
+//     frame: { x: number, y: number, h: number, w: number },
+//     // rotated?: boolean,
+//     trimmed?: boolean,
+//     // spriteSourceSize?: { x: number, y: number, h: number, w: number },
+//     // sourceSize?: { h: number, w: number },
+// };
+// const spritesheetData = (width: number, height: number, scale = 1) => {
+//     const meta = {
+//         // image: imageName,
+//         size: { w: width, h: height },
+//         scale,
+//     };
+//     const frames: { [frameName: string]: FrameData } = {};
+//     const animations: { [animName: string]: string[] } = {}; // { animName -> [ ...frameName ] }
+//     return {
+//         meta,
+//         frames,
+//         animations,
+//     };
+// };

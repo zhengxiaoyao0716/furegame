@@ -1,3 +1,4 @@
+export * from './Gradient';
 export * from './Resource';
 export * from './Sprite';
 export * from './UI';

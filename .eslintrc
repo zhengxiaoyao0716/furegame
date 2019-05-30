@@ -75,6 +75,7 @@
       }
     ],
     "import/no-extraneous-dependencies": "error",
+    "import/first": "error",
     "sort-imports": [
       "error",
       {

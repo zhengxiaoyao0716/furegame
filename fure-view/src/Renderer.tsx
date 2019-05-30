@@ -11,16 +11,16 @@ interface Props {
 export const RendererContext = createContext(undefined as PIXI.Renderer | undefined);
 RendererContext.displayName = 'Renderer';
 
-export type RendererOptions = Parameters<typeof PIXI.autoDetectRenderer>[0];
+export type RendererOptions = ConstructorParameters<typeof PIXI.Renderer>[0];
 export const Renderer = withView(
   'Renderer',
   ({ children, create }: Props): ReactElement => {
     const view = useContext(ViewContext);
-    const renderer = useCloseable(() => (create ? create(view) : PIXI.autoDetectRenderer({ view: view })));
+    const renderer = useCloseable(() => (create ? create(view) : new PIXI.Renderer({ view: view })));
     return (<RendererContext.Provider value={renderer}>{children}</RendererContext.Provider>);
   },
   {
-    Creator: (options?: RendererOptions) => useMemo(() => ({ create: (view: HTMLCanvasElement) => PIXI.autoDetectRenderer({ view, ...options }) }), []),
+    Creator: (options?: RendererOptions) => useMemo(() => ({ create: (view: HTMLCanvasElement) => new PIXI.Renderer({ view, ...options }) }), []),
   }
 );
 

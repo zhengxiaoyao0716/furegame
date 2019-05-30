@@ -1,4 +1,4 @@
-import React, { ReactNode, useState } from 'react';
+import React, { ReactNode } from 'react';
 import { App, Loader, Renderer, Stage, Ticker, UI } from 'fure-view';
 import './index.css';
 import { useSelect } from '../helper';

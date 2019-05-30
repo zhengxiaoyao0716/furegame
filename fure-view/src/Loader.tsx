@@ -20,7 +20,7 @@ export const Loader = ({ children, baseUrl, concurrency }: Props): ReactElement 
   return <LoaderContext.Provider value={loader}>{children}</LoaderContext.Provider>;
 };
 
-interface LoaderOptions { baseUrl?: string; concurrency?: number }
+export interface LoaderOptions { baseUrl?: string; concurrency?: number }
 Loader.Creator = ({ baseUrl, concurrency }: LoaderOptions) => useMemo(() => ({ create: () => new PIXI.Loader(baseUrl, concurrency) }), []);
 
 export const useLoader = (): PIXI.Loader => {

@@ -8,9 +8,9 @@ type Closeable = | { destroy: () => void } | { remove: () => void } | { close: (
 /** `Frozen` property should never be changed after mounted. */
 export type Frozen<T> = T & { [P in keyof T]: T[P] };
 
-const defaultClose = (value: Closeable): void => ('close' in value ? value.close() : 'destroy' in value ? value.destroy() : value.remove());
+export const defaultClose = (value: Closeable | {}): void => ('close' in value ? value.close() : 'destroy' in value ? value.destroy() : 'remove' in value ? value.remove() : undefined);
 
-export const useCloseable = <T extends Closeable>(
+export const useCloseable = <T>(
   supplier: Frozen<() => T>,
   close: (value: T) => void = defaultClose,
   deps: DependencyList = []
@@ -20,7 +20,7 @@ export const useCloseable = <T extends Closeable>(
   return state;
 };
 
-export const useCloseableAsync = <T extends Closeable>(
+export const useCloseableAsync = <T>(
   supplier: Frozen<() => Promise<T>>,
   close: (value: T) => void = defaultClose,
   deps: DependencyList = []
