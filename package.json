@@ -5,17 +5,17 @@
     "fure-view",
     "examples/*"
   ],
-  "name": "fure-game",
+  "name": "furegame",
   "private": true,
   "scripts": {
     "start": "run-p watch:* start:exp",
-    "start:exp": "lerna run --parallel --scope fure-examples-* start",
+    "start:exp": "lerna run --parallel --scope @fure/examples-* start",
     "watch:dts": "npm run build:dts -- --watch",
     "watch:src": "npm run build:src -- --watch",
     "build": "npm run build:dts && npm run build:src && npm run build:exp",
-    "build:exp": "lerna run --parallel --scope fure-examples-* build",
-    "build:dts": "lerna exec --parallel --scope fure-{core,main,view} -- tsc --emitDeclarationOnly --declarationMap",
-    "build:src": "lerna exec --parallel --scope fure-{core,main,view} -- babel src -d lib --extensions \".js,.jsx,.ts,.tsx\" --config-file ./../.babelrc --copy-files"
+    "build:exp": "lerna run --parallel --scope @fure/examples-* build",
+    "build:dts": "lerna exec --parallel --scope @fure/{core,main,view} -- tsc --emitDeclarationOnly --declarationMap",
+    "build:src": "lerna exec --parallel --scope @fure/{core,main,view} -- babel src -d lib --extensions \".js,.jsx,.ts,.tsx\" --config-file ./../.babelrc --copy-files"
   },
   "devDependencies": {
     "@babel/cli": "^7.4.4",

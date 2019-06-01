@@ -1,7 +1,7 @@
 import React, { useMemo } from 'react';
 import { interval } from 'rxjs';
 import { map, startWith } from 'rxjs/operators';
-import { AnimatedSprite, Gradient, MovableSprite, Renderer, RendererOptions, Sprite, Stage, THColors, UI, makeResource, useCloseable, useObservable } from 'fure-view';
+import { AnimatedSprite, Gradient, MovableSprite, Renderer, RendererOptions, Sprite, Stage, THColors, UI, makeResource, useCloseable, useObservable } from '@fure/view';
 import { playerAnims, playerPath, useSelect } from '../helper';
 
 const options: RendererOptions = { width: 1920, height: 1080, backgroundColor: 0x66ccff };

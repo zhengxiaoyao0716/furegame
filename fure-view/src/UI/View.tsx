@@ -1,18 +1,18 @@
-import React, { ComponentType, PropsWithChildren, ReactElement, createContext, useCallback, useState } from 'react';
+import React, { CSSProperties, ComponentType, PropsWithChildren, ReactElement, createContext, useCallback, useState } from 'react';
 import './View.css';
 
 export interface ViewProps {
-  id?: string; className?: string;
+  id?: string; className?: string; style?: CSSProperties;
 }
 
 export const ViewContext = createContext(undefined as HTMLCanvasElement | undefined);
 ViewContext.displayName = 'View';
 
-const View = ({ id, className = '', children }: PropsWithChildren<ViewProps>): ReactElement => {
+const View = ({ id, className = '', style, children }: PropsWithChildren<ViewProps>): ReactElement => {
   const [view, setView] = useState(undefined as HTMLCanvasElement | undefined);
   const canvasRef = useCallback(canvas => { canvas && setView(canvas); }, []);
   return (
-    <div id={id} className={`${className && `${className} `}Furegame`}>
+    <div id={id} className={`${className && `${className} `}Furegame`} style={style}>
       <canvas ref={canvasRef} />
       {view && (<ViewContext.Provider value={view}>{children}</ViewContext.Provider>)}
     </div>
@@ -21,8 +21,8 @@ const View = ({ id, className = '', children }: PropsWithChildren<ViewProps>): R
 
 export const withView = <P extends {}, E extends {}>(displayName: string, Component: ComponentType<P>, ext?: E): ComponentType<ViewProps & P> & E => {
   Component.displayName = displayName;
-  const WithView = ({ id, className, ...props }: ViewProps & P): ReactElement | null => (
-    View({ id, className, children: <Component {...props as P} /> })
+  const WithView = ({ id, className, style, ...props }: ViewProps & P): ReactElement | null => (
+    View({ id, className, style, children: <Component {...props as P} /> })
   );
   WithView.displayName = `${displayName}.View`;
   const WithExt = WithView as ComponentType<ViewProps & P> & E;

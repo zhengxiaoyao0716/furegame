@@ -1,5 +1,5 @@
 import React, { ReactNode } from 'react';
-import { App, Loader, Renderer, Stage, Ticker, UI } from 'fure-view';
+import { App, Loader, Renderer, Stage, Ticker, UI } from '@fure/view';
 import './index.css';
 import { useSelect } from '../helper';
 
@@ -20,7 +20,7 @@ const usages = {
   Advance({ children }: { children: ReactNode }) {
     return (
       <Loader> {/* `Loader` is optional */}
-        <Renderer id="game" {...Renderer.Creator({ width: 1920, height: 1080, backgroundColor: 0x66ccff })}>
+        <Renderer id="game" {...Renderer.Creator({ width: 1920, height: 1080, transparent: true })} style={{ backgroundColor: '#6cf' }}>
           <Stage>
             <Ticker> {/* `Ticker` is optional */}
               <Stage.TickRefresh />

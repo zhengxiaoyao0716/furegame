@@ -2,6 +2,9 @@
 ## Functional Reactive Game Framework
 > Try to make game using functional-reactive-programming style.
 
+- **NOT PREPARE FOR PUBLISH**
+- **还没准备好正式发布**
+
 ***
 ## The Design // 愿景
 

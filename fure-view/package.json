@@ -1,5 +1,5 @@
 {
-  "name": "fure-view",
+  "name": "@fure/view",
   "version": "0.0.0",
   "description": "Functional Reactive Game Framework (main)",
   "keywords": [
@@ -38,13 +38,13 @@
   "devDependencies": {
     "@types/react": "^16.8.17",
     "@types/react-dom": "^16.8.4",
-    "fure-core": "^0.0.0",
+    "@fure/core": "^0.0.0",
     "react": "^16.8.6",
     "react-dom": "^16.8.6",
     "rxjs": "^6.5.2"
   },
   "peerDependencies": {
-    "fure-core": "^0.0.0",
+    "@fure/core": "^0.0.0",
     "react": "^16.8.6",
     "react-dom": "^16.8.6",
     "rxjs": "^6.5.2"

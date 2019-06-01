@@ -1,5 +1,5 @@
 {
-  "name": "fure-main",
+  "name": "@fure/main",
   "version": "0.0.0",
   "description": "Functional Reactive Game Framework (main)",
   "keywords": [
@@ -34,12 +34,12 @@
   "devDependencies": {
     "@types/carlo": "^0.9.0",
     "carlo": "^0.9.45",
-    "fure-core": "^0.0.0",
+    "@fure/core": "^0.0.0",
     "rxjs": "^6.5.2"
   },
   "peerDependencies": {
     "carlo": "^0.9.45",
-    "fure-core": "^0.0.0",
+    "@fure/core": "^0.0.0",
     "rxjs": "^6.5.2"
   }
 }

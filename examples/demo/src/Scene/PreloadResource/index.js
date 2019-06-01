@@ -1,5 +1,5 @@
 import React, { ReactElement, useMemo } from 'react';
-import { App, Gradient, Progress, Sprite, THColors, Texture, UI, useObservable, useResource, useTicker } from 'fure-view';
+import { App, Gradient, Progress, Sprite, THColors, Texture, UI, useObservable, useResource, useTicker } from '@fure/view';
 import { interval, of } from 'rxjs';
 import { delay, map, mergeMap, startWith, take } from 'rxjs/operators';
 import { useSelect } from '../helper';

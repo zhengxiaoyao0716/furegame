@@ -3,7 +3,7 @@ import { Link, match } from 'react-router-dom';
 // eslint-disable-next-line import/no-extraneous-dependencies
 import { History, Location } from 'history'; // only used as type.
 import './index.css';
-import 'fure-view';
+import '@fure/view';
 import { scenes } from '../Scene';
 
 interface LocationState { } // eslint-disable-line @typescript-eslint/no-empty-interface
