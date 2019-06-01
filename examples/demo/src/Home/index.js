@@ -5,6 +5,7 @@ import { History, Location } from 'history'; // only used as type.
 import './index.css';
 import '@fure/view';
 import { scenes } from '../Scene';
+import { PUBLIC_URL } from '..';
 
 interface LocationState { } // eslint-disable-line @typescript-eslint/no-empty-interface
 
@@ -19,7 +20,7 @@ const Home = ({ history: _history, location, match: _match }: Props) => {
   return (
     <div className="Home">
       {scenes.map(Scene => (
-        <Link key={Scene.displayName} to={{ ...location, pathname: `/scene/${Scene.displayName}` }}>
+        <Link key={Scene.displayName} to={{ ...location, pathname: `${PUBLIC_URL}/scene/${Scene.displayName}` }}>
           <p>{Scene.displayText}</p>
         </Link>
       ))}
