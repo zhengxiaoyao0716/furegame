@@ -12,22 +12,15 @@ interface Props {
 export const TickerContext = createContext(PIXI.Ticker.shared);
 TickerContext.displayName = 'Ticker';
 
-class SafeCloseableTicker extends PIXI.Ticker { // patch for [#5653](https://github.com/pixijs/pixi.js/issues/5653)
-  private _destroyed = false;
-
-  public remove(...args: Parameters<typeof PIXI.Ticker.shared.remove>): SafeCloseableTicker {
-    this._destroyed || super.remove(...args);
-    return this;
-  }
-
-  public destroy(): void {
-    this._destroyed = true;
-    super.destroy();
-  }
-}
+export const _patchPIXITicker = (ticker: PIXI.Ticker): PIXI.Ticker => { // patch for [#5653](https://github.com/pixijs/pixi.js/issues/5653)
+  const remove = ticker.remove.bind(ticker);
+  ticker.remove = (...args: Parameters<PIXI.Ticker['remove']>) => (ticker as any)._head && remove(...args); // eslint-disable-line @typescript-eslint/no-explicit-any
+  return ticker;
+};
+_patchPIXITicker(PIXI.Ticker.shared);
 
 export const Ticker = ({ children, running = true, speed = 1, minFPS = 10 }: Props): ReactElement => {
-  const ticker = useCloseable(() => new SafeCloseableTicker());
+  const ticker = useCloseable(() => _patchPIXITicker(new PIXI.Ticker()));
 
   useUpdate(() => {
     if (running !== ticker.started) running ? ticker.start() : ticker.stop();

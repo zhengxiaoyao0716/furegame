@@ -3,17 +3,28 @@ import * as PIXI from 'pixi.js';
 import { useContainer } from '../Container';
 import { useCloseable, useUpdate } from '../hooks';
 
+type Degree = number;
+type Radian = number;
 export interface SpriteProps {
   children?: ReactNode;
   texture?: PIXI.Texture;
   position?: { x: number; y: number };
   scale?: { x: number; y: number };
+  rotation?: { degree: Degree } | { radian: Radian };
+  anchor?: { x: number; y: number };
 }
 
 export const SpriteContext = createContext(undefined as PIXI.Sprite | undefined);
 SpriteContext.displayName = 'Sprite';
 
-export const Sprite = ({ children, texture, position, scale }: SpriteProps): ReactElement => {
+export const Sprite = ({
+  children,
+  texture,
+  position,
+  scale,
+  anchor = { x: 0.5, y: 0.5 },
+  rotation,
+}: SpriteProps): ReactElement => {
   const container = useContainer();
   const sprite = useCloseable(() => {
     const sprite = new PIXI.Sprite(texture);
@@ -31,7 +42,15 @@ export const Sprite = ({ children, texture, position, scale }: SpriteProps): Rea
       if (scale.x !== sprite.scale.x) sprite.scale.x = scale.x;
       if (scale.y !== sprite.scale.y) sprite.scale.y = scale.y;
     }
-  }, [texture, position]);
+    if (anchor) {
+      if (anchor.x !== sprite.anchor.x) sprite.anchor.x = anchor.x;
+      if (anchor.y !== sprite.anchor.y) sprite.anchor.y = anchor.y;
+    }
+    if (rotation) {
+      if ('degree' in rotation && rotation.degree !== sprite.angle) sprite.angle = rotation.degree;
+      if ('radian' in rotation && rotation.radian !== sprite.rotation) sprite.rotation = rotation.radian;
+    }
+  }, [texture, position, scale, anchor, rotation]);
 
   return <SpriteContext.Provider value={sprite}>{children}</SpriteContext.Provider>;
 };

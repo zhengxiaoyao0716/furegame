@@ -74,6 +74,7 @@
         "allowParens": true
       }
     ],
+    "new-parens": "error",
     "import/no-extraneous-dependencies": "error",
     "import/first": "error",
     "sort-imports": [

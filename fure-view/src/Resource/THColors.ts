@@ -3,8 +3,9 @@ import * as PIXI from 'pixi.js';
 export interface THColor {
   /**  0xRRGGBBAA  */value: number;
   /**  base64 uri  */data: string;
-  /*    0xRRGGBB   */rgb: number;
-  /*      0xAA     */alpha: number;
+  /**  '#RRGGBBAA' */hex: string;
+  /**   0xRRGGBB   */rgb: number;
+  /**     0xAA     */alpha: number;
   rgba: { R: number; G: number; B: number; A: number };
   image: HTMLImageElement; texture: PIXI.Texture;
 }
@@ -23,6 +24,7 @@ const newColor = (value: number, data: string): THColor => {
   const texture = new PIXI.Texture(new PIXI.BaseTexture(image));
   return {
     value, data,
+    hex: `#${value.toString(16)}`,
     rgb, alpha: A,
     rgba: { R, G, B, A },
     image, texture,

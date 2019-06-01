@@ -4,7 +4,7 @@ import { Frozen, useCloseable } from './hooks';
 import { RendererContext } from './Renderer';
 import { LoaderContext } from './Loader';
 import { StageContext } from './Stage';
-import { TickerContext } from './Ticker';
+import { TickerContext, _patchPIXITicker } from './Ticker';
 import { ViewContext, withView } from './UI/View';
 
 interface Props {
@@ -17,7 +17,11 @@ export const App = withView(
   'App',
   ({ children, create }: Props): ReactElement => {
     const view = useContext(ViewContext);
-    const app = useCloseable(() => (create ? create(view) : new PIXI.Application({ view })));
+    const app = useCloseable(() => {
+      const app = create ? create(view) : new PIXI.Application({ view });
+      _patchPIXITicker(app.ticker);
+      return app;
+    });
     return (
       <LoaderContext.Provider value={app.loader}>
         <RendererContext.Provider value={app.renderer}>

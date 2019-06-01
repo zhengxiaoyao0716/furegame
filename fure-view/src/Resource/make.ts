@@ -3,7 +3,7 @@ import { LoaderOptions } from '../Loader';
 import { defaultClose } from '../hooks';
 
 //#region fix fuck type
-const Resource = PIXI.LoaderResource as { new(name: string, url: string | string[], options?: LoaderOptions): PIXI.LoaderResource };
+export const Resource = PIXI.LoaderResource as { new(name: string, url: string | string[], options?: LoaderOptions): PIXI.LoaderResource };
 const Polygon = PIXI.Polygon as { new(...points: (PIXI.Point | number[])[]): PIXI.Polygon };
 type Shape = Parameters<PIXI.Graphics['drawShape']>[0];
 //#endregion

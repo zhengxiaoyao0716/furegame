@@ -4,6 +4,7 @@ import { useTicker } from '..';
 
 import Simple from './Simple';
 import Velocity from './Velocity';
+import Circular from './Circular';
 
 export type PointsFn<P> = (ticker: PIXI.Ticker, points: P[]) => P[];
 export type GradientFn<P, S> = (ticker: PIXI.Ticker, points: P[], state: S) => S;
@@ -45,3 +46,4 @@ export function Gradient<P, S>({ children, pointsFn, gradientFn }: Props<P, S>):
 }
 Gradient.Simple = Simple;
 Gradient.Velocity = Velocity;
+Gradient.Circular = Circular;
