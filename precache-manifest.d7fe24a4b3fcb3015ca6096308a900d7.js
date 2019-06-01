@@ -1,19 +1,19 @@
 self.__precacheManifest = (self.__precacheManifest || []).concat([
   {
-    "revision": "bec0b938bef08c460f0e691b39acdc55",
+    "revision": "8eeca6744ab78b7b4ebc2fa6ad8a06fc",
     "url": "/furegame/index.html"
   },
   {
-    "revision": "9c09034e64b2076d41bb",
+    "revision": "76d4112299adbef1d2fc",
     "url": "/furegame/static/css/main.4f529dfe.chunk.css"
   },
   {
-    "revision": "9aeacbe8a30c76327e23",
-    "url": "/furegame/static/js/2.bb389e42.chunk.js"
+    "revision": "93c717307cf2659df38e",
+    "url": "/furegame/static/js/2.90b78fe4.chunk.js"
   },
   {
-    "revision": "9c09034e64b2076d41bb",
-    "url": "/furegame/static/js/main.5f151346.chunk.js"
+    "revision": "76d4112299adbef1d2fc",
+    "url": "/furegame/static/js/main.dec563ef.chunk.js"
   },
   {
     "revision": "48867088e6a1852887f8",
