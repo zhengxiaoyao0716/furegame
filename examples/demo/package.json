@@ -3,7 +3,7 @@
   "version": "0.0.0",
   "description": "Functional Reactive Game Framework (examples/demo)",
   "private": true,
-  "homepage" : "https://zhengxiaoyao0716.github.io/furegame",
+  "homepage": "https://zhengxiaoyao0716.github.io/furegame",
   "license": "MIT",
   "dependencies": {
     "@fure/core": "^0.0.0",
@@ -19,10 +19,13 @@
   "scripts": {
     "start": "react-scripts start",
     "build": "react-scripts build",
+    "postbuild": "babel src/main -d build/main --extensions \".js\" --config-file ../../.babelrc --copy-files",
     "test": "react-scripts test",
     "eject": "react-scripts eject",
     "predeploy": "npm run build",
-    "deploy": "gh-pages -d build"
+    "deploy": "gh-pages -d build",
+    "prepack": "npm run build",
+    "pack": "nexe -i ./build/main -o ./dist/fure -r \"build/**\" -t win-x86"
   },
   "browserslist": {
     "production": [
@@ -37,9 +40,11 @@
     ]
   },
   "devDependencies": {
+    "@babel/node": "^7.4.5",
     "@types/carlo": "^0.9.0",
     "@types/react": "^16.8.17",
     "@types/react-dom": "^16.8.4",
-    "gh-pages": "^2.0.1"
+    "gh-pages": "^2.0.1",
+    "nexe": "^3.2.1"
   }
 }
