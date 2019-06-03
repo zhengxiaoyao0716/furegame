@@ -2,9 +2,9 @@ import React, { CSSProperties, ReactElement, ReactNode, useMemo } from 'react';
 import { debounceTime, map } from 'rxjs/operators';
 import * as PIXI from 'pixi.js';
 import './index.css';
+import { fromResize } from './resize';
 import { useRenderer } from '../Renderer';
 import { useObservable } from '../hooks';
-import { fromResize } from './resize';
 
 // export * from './View'; // `View` should auto created by `Render` or `App`, should not exports to developer.
 
@@ -40,3 +40,5 @@ export const UI = ({ id, className = '', style: outerStyle, children, scaleMode 
     <div id={id} className={`${className && `${className} `}UI`} style={style}>{children}</div>
   );
 };
+
+export { fromResize } from './resize';

@@ -1,7 +1,10 @@
-import React, { ReactNode } from 'react';
-import { App, Loader, Renderer, Stage, Ticker, UI } from '@fure/view';
+import React, { ReactNode, useMemo } from 'react';
+import { debounceTime, map } from 'rxjs/operators';
+import { App, Loader, Renderer, Stage, Ticker, UI, fromResize, useObservable } from '@fure/view';
 import './index.css';
 import { useSelect } from '../helper';
+
+const bodySize = () => ({ width: document.body.clientWidth, height: document.body.clientHeight });
 
 const usages = {
   Simple({ children }: { children: ReactNode }) {
@@ -18,9 +21,13 @@ const usages = {
     );
   },
   Advance({ children }: { children: ReactNode }) {
+    const size = useObservable(useMemo(() => fromResize(document.body).pipe(debounceTime(100), map(bodySize)), []), bodySize());
     return (
       <Loader> {/* `Loader` is optional */}
-        <Renderer id="game" {...Renderer.Creator({ width: 1920, height: 1080, transparent: true })} style={{ backgroundColor: '#6cf' }}>
+        <div style={{ position: 'absolute', width: '100%', height: '100%', textAlign: 'center' }}>
+          <h1>Fill Window</h1><h1>{'&'}</h1><h1>Transparent Background</h1><h1>{'&'}</h1><h1>Scale Mode UI</h1>
+        </div>
+        <Renderer id="game" {...size} {...Renderer.Creator({ transparent: true })} style={{ backgroundColor: '#66ccffee' }}>
           <Stage>
             <Ticker> {/* `Ticker` is optional */}
               <Stage.TickRefresh />

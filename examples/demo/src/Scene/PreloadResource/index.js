@@ -13,30 +13,33 @@ const Loading = ({ progress, resource }: IndicatorProps) => (
   </UI>
 );
 
-const width = 2000;
+const size = {
+  get width() { return document.body.clientWidth; },
+  get height() { return document.body.clientHeight; },
+};
 const useShooter = (time: number, turn: number) => useMemo(
   () => interval(time * 1000)
     .pipe(startWith(0))
     .pipe(mergeMap(_ => interval(time * 1000 / turn)
       .pipe(map(i => 1 + i), startWith(0), take(turn))
     ))
-    .pipe(map(index => [index * width / turn, index])),
+    .pipe(map(index => [index * size.width / turn, index])),
   [time, turn],
 );
 
 const copies = (x: number, y: number) => (children: (x: number, y: number, index: number) => ReactElement) => {
-  return new Array(15).fill().map((_, index) => children(x + 1000 * ((index / 3 | 0) - 2), y + 360 * (index % 3), index));
+  return new Array(15).fill().map((_, index) => children(x + size.width / 2 * ((index / 3 | 0) - 2), y + size.height / 3 * (index % 3), index));
 };
 
 const Reimu = ({ texture }: { texture: Texture }) => {
   const time = 3;
   const [positionX] = useObservable(useShooter(time, 2), [0, 0]);
 
-  const velocityX = width / time / useTicker().maxFPS; // v = s / t;
+  const velocityX = size.width / time / useTicker().maxFPS; // v = s / t;
 
   return (
     <Gradient {...Gradient.Velocity([[positionX], [velocityX]])}>{([[x, y = 50]]) => (copies(x, y)((x, y, index) => (
-      <Sprite key={index} texture={texture} position={{ x, y }} scale={{ x: 6, y: 6 }} />
+      <Sprite key={index} texture={texture} position={{ x, y }} scale={{ x: 2, y: 2 }} />
     )))}</Gradient>
   );
 };
@@ -46,7 +49,7 @@ const Marisa = ({ texture }: { texture: Texture }) => {
   const [positionX] = useObservable(useShooter(time, 3), [0, 0]);
 
   const ticker = useTicker();
-  const velocityX = width / time / ticker.maxFPS; // v = s / t;
+  const velocityX = size.width / time / ticker.maxFPS; // v = s / t;
   const velocityY = -400 / ticker.maxFPS;
   const gravityY = 2 * -velocityY / ticker.maxFPS;
   const offsetY = 50; // s = -0.5g * (0.5t)^2
@@ -65,7 +68,7 @@ const Alice = ({ texture }: { texture: Texture }) => {
 
   const rotate = (index % 2 === 0 ? 1 : -1) / 3 * Math.PI;
   const frames = time * useTicker().maxFPS / turn;
-  const distance = width / turn;
+  const distance = size.width / turn;
   const direction = 0;
 
   return (
@@ -85,9 +88,9 @@ const usages = {
     const resource = useResource({
       reimu: { url: THColors.Reimu.data }, // base usage
       kagari: of({ url: 'https://raw.githubusercontent.com/zhengxiaoyao0716/rewrite-kagali/master/kagari-nobg-nolight.gif' }).toPromise(), // async usage
-      marisa: make => make.shape({ fill: { color: THColors.Marisa.rgb } }).star(5, 32, 20), // mock resource usage
+      marisa: make => make.shape({ fill: { color: THColors.Marisa.rgb } }).star(5, 12, 6), // mock resource usage
       'kagari-nobg-nolight': of({ url: 'https://raw.githubusercontent.com/zhengxiaoyao0716/rewrite-kagali/master/kagali.gif' }).pipe(delay(300)).toPromise(), // async usage with delay
-      alice: make => of(make.shape({ fill: { color: THColors.Alice.rgb } }).triangle(46, 60, 23)).pipe(delay(600)).toPromise(), // async and mock resource usage
+      alice: make => of(make.shape({ fill: { color: THColors.Alice.rgb } }).triangle(16, 20, 8)).pipe(delay(600)).toPromise(), // async and mock resource usage
     });
     const textures = useResource.query(resource)('texture');
 
@@ -105,7 +108,7 @@ const usages = {
 const PreloadResource = () => {
   const [Usage] = useSelect('Simple', usages);
   return (
-    <App {...App.Creator({ width: 1920, height: 1080, backgroundColor: 0x66ccff })}>
+    <App resizeTo={document.body} {...App.Creator({ backgroundColor: 0x66ccff })}>
       <Usage />
     </App>
   );
