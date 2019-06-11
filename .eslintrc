@@ -13,7 +13,7 @@
   "overrides": [
     {
       "files": [
-        "examples/demo/**/*.{js,jsx,ts,tsx}",
+        "examples/**/*.{js,jsx,ts,tsx}",
         "fure-view/**/*.{js,jsx,ts,tsx}"
       ],
       "env": {
@@ -22,6 +22,7 @@
     },
     {
       "files": [
+        "examples/**/main/**/*.{js,jsx,ts,tsx}",
         "fure-core/**/*.{js,ts}",
         "fure-main/**/*.{js,ts}"
       ],

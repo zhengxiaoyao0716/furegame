@@ -27,7 +27,7 @@ const usages = {
         <div style={{ position: 'absolute', width: '100%', height: '100%', textAlign: 'center' }}>
           <h1>Fill Window</h1><h1>{'&'}</h1><h1>Transparent Background</h1><h1>{'&'}</h1><h1>Scale Mode UI</h1>
         </div>
-        <Renderer id="game" {...size} {...Renderer.Creator({ transparent: true })} style={{ backgroundColor: '#66ccffee' }}>
+        <Renderer id="game" {...size} {...Renderer.Creator({ transparent: true })} style={{ backgroundColor: 'rgba(102, 204, 255, 0.933)' }}>
           <Stage>
             <Ticker> {/* `Ticker` is optional */}
               <Stage.TickRefresh />

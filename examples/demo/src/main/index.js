@@ -1,5 +1,6 @@
+import path from 'path';
 import { main } from '@fure/main';
-import core from './core';
+import LogicDecoupling from './core/LogicDecoupling';
 
 const parseArgs = (argv: string[]) => argv.reduce((args, arg, index) => {
   if (!arg.startsWith('-')) return args;
@@ -10,7 +11,12 @@ const parseArgs = (argv: string[]) => argv.reduce((args, arg, index) => {
 }, {});
 const args: { dev?: boolean | 'true'; windowed?: boolean | 'true' } = parseArgs(process.argv); // eslint-disable-line no-undef
 
-const page = args.dev ? 'http://localhost:3000' : '/';
-args.dev && console.log(`launch with develop mode, load: ${page}.`); // eslint-disable-line no-console
-
-main(core, page);
+const options = args.dev ? {
+  page: 'http://localhost:3000',
+} : {
+  buildDir: path.resolve(__dirname, '../../build'),
+  buildPrefix: 'furegame',
+  page: '/furegame',
+};
+args.dev && console.log('launch with develop mode:', options); // eslint-disable-line no-console
+main([LogicDecoupling], options);
