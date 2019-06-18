@@ -36,6 +36,7 @@
       "error",
       "single"
     ],
+    "jsx-quotes": "error",
     "prefer-template": "error",
     "eol-last": "error",
     "curly": [

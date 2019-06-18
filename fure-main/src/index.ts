@@ -28,17 +28,21 @@ export const pipeBuild = (buildDir?: string, prefix?: string): Pipe => async app
   return app;
 };
 
-export const pipeCore = <E extends Events, D>(core: Core<E, D>): Pipe => async app => {
-  await app.exposeFunction(`_fure_core_rpc-${core.id}`, core.rpc);
+export const pipeCore = <E extends Events, M>(core: Core<E, M>): Pipe => async app => {
+  await app.exposeFunction(core.rpcId, core.rpc);
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const subject = (core as any)[`_fure_core_subject-${core.id}`] as Subject<D>;
-  subject.subscribe({
-    next: data => app && app.evaluate(data => {
+  const subject = (core as any)[core.subjectId] as Subject<M>;
+  const subcription = subject.subscribe(data => {
+    const win = app.mainWindow();
+    win && win.evaluate((data, subjectId) => {
+      //#region THE BROWSER WINDOW CONTEXT
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       const g = window as any; // eslint-disable-line no-undef
-      return g[`_fure_core_subject-${core.id}`].next(data);
-    }, data as any), // eslint-disable-line @typescript-eslint/no-explicit-any
+      return g[subjectId].next(data);
+      //#endregion
+    }, data as any, core.subjectId); // eslint-disable-line @typescript-eslint/no-explicit-any
   });
+  app.on('exit', () => subcription.unsubscribe());
   return app;
 };
 
@@ -65,8 +69,8 @@ interface Options {
   fullscreen?: boolean;
   page?: string;
 }
-export const main = async <E extends Events, D>(
-  cores: Core<E, D>[],
+export const main = async <E extends Events, M>(
+  cores: Core<E, M>[],
   {
     buildDir = '',
     buildPrefix = '',

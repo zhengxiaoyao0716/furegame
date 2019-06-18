@@ -1,0 +1,88 @@
+.LogicDecoupling {
+  display: flex;
+  flex-direction: row;
+  justify-content: space-around;
+}
+.LogicDecoupling>.Furegame {
+  position: relative;
+}
+.LogicDecoupling>.Furegame>canvas {
+  max-width: 50vh;
+  max-height: 100vh;
+}
+@media all and (orientation: portrait) {
+  .LogicDecoupling {
+    flex-direction: column;
+  }
+  .LogicDecoupling>.Furegame>canvas {
+    max-width: 100vh;
+    max-height: 50vh;
+  }
+}
+
+.LogicDecoupling .Bubble,
+.LogicDecoupling .Player {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%);
+  border-radius: 50%;
+}
+.LogicDecoupling .Bubble {
+  width: 3em;
+  height: 3em;
+  background: #eee;
+}
+.LogicDecoupling .Player {
+  padding: 1px;
+  width: 12em;
+  height: 12em;
+  border: 1px solid #eee;
+  transition: linear 0.6s;
+  transition-property: width, height;
+  cursor: pointer;
+}
+.LogicDecoupling *:hover>.Player {
+  width: 10em;
+  height: 10em;
+}
+.LogicDecoupling *.fight>.Player {
+  width: 3em;
+  height: 3em;
+  transition-duration: 0.1s;
+}
+
+.LogicDecoupling .name,
+.LogicDecoupling .Message {
+  position: absolute;
+  text-align: center;
+  pointer-events: none;
+}
+.LogicDecoupling .name {
+  width: 100%;
+  bottom: 1em;
+  color: #ccc;
+}
+.LogicDecoupling .Message {
+  width: 90%;
+  left: 5%;
+  top: 10%;
+  color: #fff;
+}
+.LogicDecoupling .Message>* {
+  background: rgba(0, 0, 0, 0.3);
+  margin: 0.1em 0;
+}
+
+.LogicDecoupling .Bubble.fire {
+  background-color: #f58c8c;
+}
+.LogicDecoupling .Player.fire {
+  border-color: #f58c8c;
+}
+.LogicDecoupling .Bubble.water {
+  background-color: #b1e5ff;
+}
+.LogicDecoupling .Player.water {
+  border-color: #b1e5ff;
+}
