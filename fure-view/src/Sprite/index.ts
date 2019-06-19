@@ -1,3 +1,3 @@
 export * from './Animated';
-export * from './Sprite';
+export { SpriteProps, SpriteContext, useSprite, Sprite } from './Sprite';
 export * from './Movable';

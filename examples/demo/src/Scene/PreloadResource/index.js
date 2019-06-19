@@ -1,7 +1,7 @@
 import React, { ReactElement, useMemo } from 'react';
 import { App, Gradient, Progress, Sprite, THColors, Texture, UI, useObservable, useResource, useTicker } from '@fure/view';
-import { interval, of } from 'rxjs';
-import { delay, map, mergeMap, startWith, take } from 'rxjs/operators';
+import { of, timer } from 'rxjs';
+import { delay, map, mergeMap, take } from 'rxjs/operators';
 import { useSelect } from '../helper';
 
 const Loading = ({ progress, resource }: IndicatorProps) => (
@@ -18,10 +18,10 @@ const size = {
   get height() { return document.body.clientHeight; },
 };
 const useShooter = (time: number, turn: number) => useMemo(
-  () => interval(time * 1000)
-    .pipe(startWith(0))
-    .pipe(mergeMap(_ => interval(time * 1000 / turn)
-      .pipe(map(i => 1 + i), startWith(0), take(turn))
+  () => timer(0, time * 1000)
+    .pipe(mergeMap(_ =>
+      timer(0, time * 1000 / turn)
+        .pipe(take(turn))
     ))
     .pipe(map(index => [index * size.width / turn, index])),
   [time, turn],

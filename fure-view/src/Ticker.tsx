@@ -1,4 +1,4 @@
-import React, { ReactElement, ReactNode, createContext, useContext, useDebugValue } from 'react';
+import React, { ReactElement, ReactNode, Ref, createContext, useContext, useDebugValue, useEffect, useRef } from 'react';
 import * as PIXI from 'pixi.js';
 import { useCloseable, useUpdate } from './hooks';
 
@@ -35,4 +35,15 @@ export const useTicker = (): PIXI.Ticker => {
   const ticker = useContext(TickerContext);
   useDebugValue(ticker, ticker => ticker.FPS.toFixed(2));
   return ticker;
+};
+
+export const usePlayTime = (): Ref<number> => {
+  const ticker = useTicker();
+  const playTime = useRef(0);
+  useEffect(() => {
+    const refresh = (): void => { playTime.current += ticker.deltaMS; };
+    ticker.add(refresh);
+    return () => { ticker.remove(refresh); };
+  }, []);
+  return playTime;
 };
