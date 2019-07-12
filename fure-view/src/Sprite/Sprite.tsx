@@ -1,4 +1,4 @@
-import React, { ReactElement, ReactNode, createContext, useContext, useEffect } from 'react';
+import React, { ReactElement, ReactNode, createContext, useContext, useEffect, useMemo } from 'react';
 import * as PIXI from 'pixi.js';
 import { useContainer } from '../Container';
 import { useCloseable, useUpdate } from '../hooks';
@@ -72,6 +72,7 @@ export const Sprite = (props: SpriteProps): ReactElement => {
 Sprite.Ticker = ({ update }: { update: (sprite: PIXI.Sprite) => void }) => {
   const ticker = useTicker();
   const sprite = useSprite();
+  useMemo(() => { update(sprite); }, []);
   useEffect(() => {
     const refresh = (): void => update(sprite);
     ticker.add(refresh);

@@ -32,13 +32,15 @@
     "url": "https://github.com/zhengxiaoyao0716/furegame/issues"
   },
   "dependencies": {
+    "@types/matter-js": "^0.10.2",
+    "matter-js": "^0.14.2",
     "pixi.js": "^5.0.2",
     "qrcode": "^1.3.3"
   },
   "devDependencies": {
+    "@fure/core": "^0.0.0",
     "@types/react": "^16.8.17",
     "@types/react-dom": "^16.8.4",
-    "@fure/core": "^0.0.0",
     "react": "^16.8.6",
     "react-dom": "^16.8.6",
     "rxjs": "^6.5.2"

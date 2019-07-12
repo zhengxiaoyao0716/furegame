@@ -21,7 +21,8 @@
 - `snap` 指状态的快照，即节点某时刻的状态。
 - `iterate` 迭代瞬时状态时，需要按照游戏规则，处理游戏逻辑、物理法则与相关结算等。
 - 无论本地、服务端还是联机远程，都应该跑着一个 `Logic` 层各自计算逻辑，然后交给 `Server` 层去叠加决出状态后交给 `Render` 渲染。
-- `Logic` 层提出来了理论上以后就能很方便的用 `C/C++` 写的物理引擎了，对 `JS` 的玩具物理引擎效率还是有点担心。
+- ~~`Logic` 层提出来了理论上以后就能很方便的用 `C/C++` 写的物理引擎了~~ 考虑到有一层RPC传输，还是仅限制在特别核心的部分吧。
+> 好吧，看来物理引擎脱离是个糟主意，准备重构吧。。。
 
 ### `MAIN` *(Server)* // 服务层
 ![state = \delta(state_{local}, state_{remote}, ...)](https://latex.codecogs.com/png.latex?%5CLARGE%20state%20%3D%20%5Cdelta%28state_%7Blocal%7D%2C%20state_%7Bremote%7D%2C%20...%29)

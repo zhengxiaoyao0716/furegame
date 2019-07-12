@@ -1,4 +1,5 @@
 export * from './Gradient';
+export * from './Physics';
 export * from './Resource';
 export * from './Sprite';
 export * from './UI';

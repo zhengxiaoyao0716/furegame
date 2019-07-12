@@ -37,6 +37,7 @@ export const useTicker = (): PIXI.Ticker => {
   return ticker;
 };
 
+// playing time, exclude pause time.
 export const usePlayTime = (): Ref<number> => {
   const ticker = useTicker();
   const playTime = useRef(0);

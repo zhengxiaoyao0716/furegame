@@ -2388,6 +2388,11 @@
     "@types/istanbul-lib-coverage" "*"
     "@types/istanbul-lib-report" "*"
 
+"@types/matter-js@^0.10.2":
+  version "0.10.2"
+  resolved "https://registry.npm.taobao.org/@types/matter-js/download/@types/matter-js-0.10.2.tgz#49c20c23316637538c860f6d2e3d4d89b20a6551"
+  integrity sha1-ScIMIzFmN1OMhg9tLj1NibIKZVE=
+
 "@types/minimatch@*":
   version "3.0.3"
   resolved "https://registry.npm.taobao.org/@types/minimatch/download/@types/minimatch-3.0.3.tgz#3dca0e3f33b200fc7d1139c0cd96c1268cadfd9d"
@@ -8478,6 +8483,11 @@ map-visit@^1.0.0:
   integrity sha1-7Nyo8TFE5mDxtb1B8S80edmN+48=
   dependencies:
     object-visit "^1.0.0"
+
+matter-js@^0.14.2:
+  version "0.14.2"
+  resolved "https://registry.npm.taobao.org/matter-js/download/matter-js-0.14.2.tgz#8169af9e06fdc356ba9e72b49624eb329839883b"
+  integrity sha1-gWmvngb9w1a6nnK0liTrMpg5iDs=
 
 md5.js@^1.3.4:
   version "1.3.5"
