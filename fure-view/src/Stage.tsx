@@ -22,13 +22,13 @@ export const useStage = useContainer;
 Stage.LazyRefresh = () => {
   const stage = useStage() as PIXI.Container & { refresh?: () => void };
   const renderer = useRenderer();
-  const ticker = useTicker();
-  stage.refresh && ticker.remove(stage.refresh);
-  stage.refresh = useCallback(() => {
+  const refresh = useCallback(() => {
     renderer.render(stage);
-    stage.refresh = undefined;
-  }, []);
-  ticker.addOnce(stage.refresh);
+  }, [renderer, stage]);
+
+  const ticker = useTicker();
+  ticker.addOnce(refresh);
+
   return null;
 };
 (Stage.LazyRefresh as any).displayName = 'Stage.LazyRefresh'; // eslint-disable-line @typescript-eslint/no-explicit-any

@@ -14,6 +14,7 @@ export interface AnimatedSpriteProps extends SpriteProps {
 }
 
 export const AnimatedSprite = ({
+  textures,
   autoUpdate,
   playing = true,
   loop = true,
@@ -22,7 +23,7 @@ export const AnimatedSprite = ({
 }: AnimatedSpriteProps): ReactElement => {
   const container = useContainer();
   const sprite = useCloseable(() => {
-    const sprite = new PIXI.AnimatedSprite(props.textures, autoUpdate);
+    const sprite = new PIXI.AnimatedSprite(textures, autoUpdate);
     container.addChild(sprite);
     return sprite;
   }, sprite => {
@@ -31,10 +32,11 @@ export const AnimatedSprite = ({
   });
 
   useUpdate(() => {
+    if (textures !== sprite.textures) (sprite.textures as AnimatedSpriteProps['textures']) = textures;
     if (playing !== sprite.playing) playing ? sprite.play() : sprite.stop();
     if (loop !== sprite.loop) sprite.loop = loop;
     if (animationSpeed !== sprite.animationSpeed) sprite.animationSpeed = animationSpeed;
-  }, [playing, loop, animationSpeed]);
+  }, [textures, playing, loop, animationSpeed]);
 
   return withSprite(sprite, props);
 };
