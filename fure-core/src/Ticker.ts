@@ -42,13 +42,17 @@ export class Ticker {
     return 1000 / this.time.delta;
   }
 
+  private autoStart?: () => void;
+
   public readonly pipe: Subject<number>['pipe'];
   // execute `fn` each tick.
   public each(fn: (delta: number) => void): Subscription {
+    this.autoStart && this.autoStart();
     return this.pipe().subscribe(fn);
   }
   // execute `fn` once at next tick.
   public once(fn: (delta: number) => void): Subscription {
+    this.autoStart && this.autoStart();
     return this.pipe(take(1)).subscribe(fn);
   }
 
@@ -65,14 +69,16 @@ export class Ticker {
   public pause(): Promise<void> { return this.core.events.pause(); }
   //#endregion
 
-  public static shared = new Ticker('shared');
+  public static shared = new Ticker('shared', true);
 
   /**
    * Ticker.
+   * if you create a new `Ticker`, then in most time you shoud registered it into `main` app by `pipeCore`.
    * @param id .
+   * @param autoStart if `true` it would invoke `start()` automatically when `each`, `once` was called.
    * @param syncPeriod default is `100`, it will sync timer betweenn browser and back-end each `syncPeriod` millisecond.
    */
-  public constructor(id: string, syncPeriod = 100) {
+  public constructor(id: string, autoStart = false, syncPeriod = 100) {
     //#region init core
 
     const core = (() => {
@@ -91,6 +97,13 @@ export class Ticker {
     core.pipe(pick('running')).subscribe(running => this._running = running);
     this.core = core;
     //#endregion
+
+    if (autoStart) {
+      this.autoStart = () => {
+        this.start();
+        this.autoStart = undefined;
+      };
+    }
 
     //#region init timer
 

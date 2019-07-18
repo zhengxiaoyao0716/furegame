@@ -1,7 +1,7 @@
 import React, { useMemo } from 'react';
 import { timer } from 'rxjs';
 import { map } from 'rxjs/operators';
-import { AnimatedSprite, Gradient, MovableSprite, Renderer, RendererOptions, Sprite, Stage, THColors, TickerController, UI, makeResource, useCloseable, useObservable } from '@fure/view';
+import { AnimatedSprite, Gradient, MovableSprite, Renderer, RendererOptions, Sprite, Stage, THColors, UI, makeResource, useCloseable, useObservable } from '@fure/view';
 import { playerAnims, playerPath, useSelect } from '../helper';
 
 const options: RendererOptions = { width: 1920, height: 1080, backgroundColor: 0x66ccff };
@@ -53,18 +53,16 @@ const usages = {
 const TextureAndSprite = () => {
   const [Usage, usageSelector] = useSelect('Simple', usages);
   return (
-    <TickerController>
-      <Renderer {...Renderer.Creator(options)}>
-        <Stage>
-          <UI id="helper">
-            <p {...usageSelector('Simple')}>Simple Usage</p>
-            <p {...usageSelector('Animated')}>Animated Usage</p>
-            <p {...usageSelector('Moveable')}>Moveable Usage</p>
-          </UI>
-          <Usage />
-        </Stage>
-      </Renderer>
-    </TickerController>
+    <Renderer {...Renderer.Creator(options)}>
+      <Stage>
+        <UI id="helper">
+          <p {...usageSelector('Simple')}>Simple Usage</p>
+          <p {...usageSelector('Animated')}>Animated Usage</p>
+          <p {...usageSelector('Moveable')}>Moveable Usage</p>
+        </UI>
+        <Usage />
+      </Stage>
+    </Renderer>
   );
 };
 TextureAndSprite.displayName = 'TextureAndSprite';

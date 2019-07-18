@@ -3,6 +3,7 @@ import { debounceTime, map } from 'rxjs/operators';
 import { App, Loader, Renderer, Stage, TickerController, UI, fromResize, useObservable } from '@fure/view';
 import './index.css';
 import { useSelect } from '../helper';
+import { Ticker } from '@fure/core';
 
 const bodySize = () => ({ width: document.body.clientWidth, height: document.body.clientHeight });
 
@@ -29,7 +30,7 @@ const usages = {
         </div>
         <Renderer id="game" {...size} {...Renderer.Creator({ transparent: true })} style={{ backgroundColor: 'rgba(102, 204, 255, 0.933)' }}>
           <Stage>
-            <TickerController> {/* `Ticker` is optional */}
+            <TickerController ticker={new Ticker()} /* `Ticker` is optional */>
               <Stage.TickRefresh />
             </TickerController>
           </Stage>

@@ -24,11 +24,9 @@ Stage.LazyRefresh = () => {
   const stage = useStage();
   const renderer = useRenderer();
   const ticker = useTicker();
-  const subRef = useRef(null as Subscription | null);
 
-  if (!subRef.current || subRef.current.closed) {
-    subRef.current = ticker.once(() => renderer.render(stage));
-  }
+  const subRef = useRef(null as Subscription | null);
+  subRef.current = ticker.once(() => renderer.render(stage));
 
   useEffect(() => {
     return () => { subRef.current && subRef.current.unsubscribe(); };
