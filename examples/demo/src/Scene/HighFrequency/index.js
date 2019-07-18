@@ -1,7 +1,7 @@
 import React, { useCallback, useEffect, useMemo } from 'react';
 import { timer } from 'rxjs';
 import { map } from 'rxjs/operators';
-import { App, AppOptions, BLEND_MODES, Container, Sprite, makeResource, useCloseable, usePlayTime } from '@fure/view';
+import { App, AppOptions, BLEND_MODES, Container, Sprite, makeResource, useCloseable, useTicker } from '@fure/view';
 
 const options: AppOptions = { width: 1920, height: 1080, backgroundColor: 0x66ccff };
 const birth = { x: options.width / 2, y: options.height / 2 };
@@ -16,7 +16,7 @@ const Particle = () => {
     texture => texture.destroy(),
   );
 
-  const playTime = usePlayTime();
+  const ticker = useTicker();
 
   //#region particles shooter
   const particles = useMemo(() => [], []);
@@ -27,14 +27,14 @@ const Particle = () => {
         sin: Math.sin(angle),
         scale: 0.5 + Math.random(),
         tint: Math.random() * 0xffffff | 0,
-        sendAt: playTime.current,
+        sendAt: ticker.runTime,
       })));
     const subcription = emitter.subscribe(particle => {
       particles.unshift(particle);
       if (particles.length > size) particles.pop();
     });
     return () => subcription.unsubscribe();
-  }, [particles, playTime]);
+  }, [particles, ticker]);
   //#endregion
 
   // hight frequence update, used only when necessary, for most time, just use `Gradient` to make our code more `reactive`.
@@ -45,14 +45,14 @@ const Particle = () => {
     }
     sprite.visible = true;
     const { cos, sin, scale, tint, sendAt } = particles[index];
-    const distance = (playTime.current - sendAt) * speed;
+    const distance = (ticker.runTime - sendAt) * speed;
     const position = { x: birth.x + cos * distance, y: birth.y + sin * distance };
     sprite.position.x = position.x;
     sprite.position.y = position.y;
     sprite.scale.x = scale;
     sprite.scale.y = scale;
     sprite.tint = tint;
-  }, [particles, playTime]);
+  }, [particles, ticker]);
 
   return (
     <Container>{new Array(size).fill().map((_, index) => (

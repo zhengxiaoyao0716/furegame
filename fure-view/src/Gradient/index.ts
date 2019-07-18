@@ -1,13 +1,13 @@
 import { ReactElement, useDebugValue, useEffect, useRef, useState } from 'react';
-import * as PIXI from 'pixi.js';
 import { useTicker } from '..';
 
 import Simple from './Simple';
 import Velocity from './Velocity';
 import Circular from './Circular';
+import { Ticker } from '@fure/core';
 
-export type PointsFn<P> = (ticker: PIXI.Ticker, points: P[]) => P[];
-export type GradientFn<P, S> = (ticker: PIXI.Ticker, points: P[], state: S) => S;
+export type PointsFn<P> = (ticker: Ticker, points: P[]) => P[];
+export type GradientFn<P, S> = (ticker: Ticker, points: P[], state: S) => S;
 
 export function useGradient<P, S>(pointsFn: PointsFn<P>, gradientFn: GradientFn<P, S>): S | undefined {
   const ticker = useTicker();
@@ -20,12 +20,11 @@ export function useGradient<P, S>(pointsFn: PointsFn<P>, gradientFn: GradientFn<
   const [state, setState] = useState(undefined as S | undefined);
   useEffect(() => {
     let state: S;
-    const gradient = (): void => {
+    const sub = ticker.each(() => {
       state = gradientFn(ticker, points.current, state);
       setState(state);
-    };
-    ticker.add(gradient);
-    return () => { ticker.remove(gradient); };
+    });
+    return () => sub.unsubscribe();
   }, [gradientFn]);
 
   useDebugValue(state, JSON.stringify);

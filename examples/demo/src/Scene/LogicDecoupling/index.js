@@ -1,9 +1,10 @@
 import React, { useEffect, useMemo } from 'react';
-import { filter, map, pluck, scan, throttleTime } from 'rxjs/operators';
+import { map, scan, throttleTime } from 'rxjs/operators';
 import { App, AppOptions, useObservable } from '@fure/view';
 import './index.css';
 import { LogicDecoupling as core } from '../../main/core';
 import { Subject, interval } from 'rxjs';
+import { pick } from '@fure/core';
 
 const options: AppOptions = { width: 960, height: 1080, transparent: true };
 type Attr = | 'fire' | 'water';
@@ -41,9 +42,9 @@ Message.queue = scan((queue: [[string, number]], message: string): [[string, num
 
 interface GameProps { player: PlayerProps & { name: string } }
 const Game = ({ player }: GameProps) => {
-  const life = useObservable(useMemo(() => core.pipe(pluck('life'), filter(v => v != null)), []), 0);
-  const attr = useObservable(useMemo(() => core.pipe(pluck('attr'), filter(v => v != null)), []));
-  const messages = useObservable(useMemo(() => core.pipe(pluck('message'), filter(v => v != null)).pipe(Message.queue), []));
+  const life = useObservable(useMemo(() => core.pipe(pick('life')), []), 0);
+  const attr = useObservable(useMemo(() => core.pipe(pick('attr')), []));
+  const messages = useObservable(useMemo(() => core.pipe(pick('message')).pipe(Message.queue), []));
 
   useEffect(() => {
     core.events.join(player.name, player.attr);

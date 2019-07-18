@@ -2,7 +2,7 @@ import { useCallback } from 'react';
 import { GradientFn, PointsFn } from '.';
 
 const simplePointsFn = (state: number): PointsFn<{ state: number; time: number }> => (
-  (ticker, points) => [{ state, time: ticker.lastTime }, ...points.slice(0, 1)]
+  (ticker, points) => [{ state, time: ticker.now }, ...points.slice(0, 1)]
 );
 
 const simpleGradientFn = (): GradientFn<{ state: number; time: number }, number> => (
@@ -10,8 +10,8 @@ const simpleGradientFn = (): GradientFn<{ state: number; time: number }, number>
     if (point1 == null) return 0;
     if (state === point0.state) return point0.state;
 
-    const remain = (point0.time - point1.time) - (ticker.lastTime - point0.time);
-    const interp = state + (point0.state - state) / remain * ticker.elapsedMS;
+    const remain = (point0.time - point1.time) - (ticker.now - point0.time);
+    const interp = state + (point0.state - state) / remain * ticker.deltaTime;
 
     return Math.max(state, Math.min(interp, point0.state));
   }

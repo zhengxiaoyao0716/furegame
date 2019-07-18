@@ -1,50 +1,33 @@
-import React, { ReactElement, ReactNode, Ref, createContext, useContext, useDebugValue, useEffect, useRef } from 'react';
-import * as PIXI from 'pixi.js';
-import { useCloseable, useUpdate } from './hooks';
+import React, { ReactElement, ReactNode, createContext, useContext, useDebugValue, useEffect } from 'react';
+import { useUpdate } from './hooks';
+import { Ticker } from '@fure/core';
 
 interface Props {
+  ticker?: Ticker;
   children?: ReactNode;
   running?: boolean;
-  speed?: number;
-  minFPS?: number;
 }
 
-export const TickerContext = createContext(PIXI.Ticker.shared);
+export const TickerContext = createContext(Ticker.shared);
 TickerContext.displayName = 'Ticker';
 
-export const _patchPIXITicker = (ticker: PIXI.Ticker): PIXI.Ticker => { // patch for [#5653](https://github.com/pixijs/pixi.js/issues/5653)
-  const remove = ticker.remove.bind(ticker);
-  ticker.remove = (...args: Parameters<PIXI.Ticker['remove']>) => (ticker as any)._head && remove(...args); // eslint-disable-line @typescript-eslint/no-explicit-any
-  return ticker;
-};
-_patchPIXITicker(PIXI.Ticker.shared);
-
-export const Ticker = ({ children, running = true, speed = 1, minFPS = 10 }: Props): ReactElement => {
-  const ticker = useCloseable(() => _patchPIXITicker(new PIXI.Ticker()));
-
+export const TickerController = ({ ticker = Ticker.shared, children = null, running = true }: Props): ReactElement => {
   useUpdate(() => {
-    if (running !== ticker.started) running ? ticker.start() : ticker.stop();
-    if (speed !== ticker.speed) ticker.speed = speed;
-    if (minFPS !== ticker.minFPS) ticker.minFPS = minFPS;
-  }, [running, speed, minFPS]);
+    if (running !== ticker.running) running ? ticker.start() : ticker.pause();
+  }, [running]);
+  useEffect(() => {
+    return () => { ticker.pause(); };
+  }, []);
 
-  return <TickerContext.Provider value={ticker}>{children}</TickerContext.Provider>;
+  return (
+    <TickerContext.Provider value={ticker}>
+      {children}
+    </TickerContext.Provider>
+  );
 };
 
-export const useTicker = (): PIXI.Ticker => {
+export const useTicker = (): Ticker => {
   const ticker = useContext(TickerContext);
   useDebugValue(ticker, ticker => ticker.FPS.toFixed(2));
   return ticker;
-};
-
-// playing time, exclude pause time.
-export const usePlayTime = (): Ref<number> => {
-  const ticker = useTicker();
-  const playTime = useRef(0);
-  useEffect(() => {
-    const refresh = (): void => { playTime.current += ticker.deltaMS; };
-    ticker.add(refresh);
-    return () => { ticker.remove(refresh); };
-  }, []);
-  return playTime;
 };

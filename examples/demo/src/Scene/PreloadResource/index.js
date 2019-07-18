@@ -1,5 +1,5 @@
 import React, { ReactElement, useMemo } from 'react';
-import { App, Gradient, Progress, Sprite, THColors, Texture, UI, useObservable, useResource, useTicker } from '@fure/view';
+import { App, Gradient, Progress, Sprite, THColors, Texture, UI, useObservable, useResource } from '@fure/view';
 import { of, timer } from 'rxjs';
 import { delay, map, mergeMap, take } from 'rxjs/operators';
 import { useSelect } from '../helper';
@@ -35,7 +35,7 @@ const Reimu = ({ texture }: { texture: Texture }) => {
   const time = 3;
   const [positionX] = useObservable(useShooter(time, 2), [0, 0]);
 
-  const velocityX = size.width / time / useTicker().maxFPS; // v = s / t;
+  const velocityX = size.width / time / 1000; // v = s / t;
 
   return (
     <Gradient {...Gradient.Velocity([[positionX], [velocityX]])}>{([[x, y = 50]]) => (copies(x, y)((x, y, index) => (
@@ -48,10 +48,9 @@ const Marisa = ({ texture }: { texture: Texture }) => {
   const time = 3;
   const [positionX] = useObservable(useShooter(time, 3), [0, 0]);
 
-  const ticker = useTicker();
-  const velocityX = size.width / time / ticker.maxFPS; // v = s / t;
-  const velocityY = -400 / ticker.maxFPS;
-  const gravityY = 2 * -velocityY / ticker.maxFPS;
+  const velocityX = size.width / time / 1000; // v = s / t;
+  const velocityY = -400 / 1000;
+  const gravityY = 2 * -velocityY / 1000;
   const offsetY = 50; // s = -0.5g * (0.5t)^2
 
   return (
@@ -67,7 +66,7 @@ const Alice = ({ texture }: { texture: Texture }) => {
   const [positionX, index] = useObservable(useShooter(time, turn), [0, 0]);
 
   const rotate = (index % 2 === 0 ? 1 : -1) / 3 * Math.PI;
-  const frames = time * useTicker().maxFPS / turn;
+  const frames = time * 1000 / turn;
   const distance = size.width / turn;
   const direction = 0;
 

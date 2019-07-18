@@ -1,6 +1,6 @@
 import React, { ReactNode, useMemo } from 'react';
 import { debounceTime, map } from 'rxjs/operators';
-import { App, Loader, Renderer, Stage, Ticker, UI, fromResize, useObservable } from '@fure/view';
+import { App, Loader, Renderer, Stage, TickerController, UI, fromResize, useObservable } from '@fure/view';
 import './index.css';
 import { useSelect } from '../helper';
 
@@ -29,9 +29,9 @@ const usages = {
         </div>
         <Renderer id="game" {...size} {...Renderer.Creator({ transparent: true })} style={{ backgroundColor: 'rgba(102, 204, 255, 0.933)' }}>
           <Stage>
-            <Ticker> {/* `Ticker` is optional */}
+            <TickerController> {/* `Ticker` is optional */}
               <Stage.TickRefresh />
-            </Ticker>
+            </TickerController>
           </Stage>
           <UI id="hello" scaleMode={true}>
             <h2>HELLO</h2>

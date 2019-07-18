@@ -1,9 +1,10 @@
-import React, { ReactElement, ReactNode, useCallback, useEffect } from 'react';
+import React, { ReactElement, ReactNode, Ref, useCallback, useEffect, useRef } from 'react';
 import * as PIXI from 'pixi.js';
 import { ContainerContext, useContainer } from './Container';
 import { useCloseable } from './hooks';
 import { useRenderer } from './Renderer';
 import { useTicker } from './Ticker';
+import { Subscription } from 'rxjs';
 
 interface Props {
   children?: ReactNode;
@@ -20,14 +21,18 @@ export const useStage = useContainer;
 
 /** `LazyRefresh` would refresh the `stage` only if the node was re-rendered. */
 Stage.LazyRefresh = () => {
-  const stage = useStage() as PIXI.Container & { refresh?: () => void };
+  const stage = useStage();
   const renderer = useRenderer();
-  const refresh = useCallback(() => {
-    renderer.render(stage);
-  }, [renderer, stage]);
-
   const ticker = useTicker();
-  ticker.addOnce(refresh);
+  const subRef = useRef(null as Subscription | null);
+
+  if (!subRef.current || subRef.current.closed) {
+    subRef.current = ticker.once(() => renderer.render(stage));
+  }
+
+  useEffect(() => {
+    return () => { subRef.current && subRef.current.unsubscribe(); };
+  }, []);
 
   return null;
 };
@@ -39,9 +44,8 @@ Stage.TickRefresh = () => {
   const renderer = useRenderer();
   const ticker = useTicker();
   useEffect(() => {
-    const refresh = (): void => renderer.render(stage);
-    ticker.add(refresh);
-    return () => { ticker.remove(refresh); };
+    const sub = ticker.each(() => renderer.render(stage));
+    return () => sub.unsubscribe();
   }, []);
   return null;
 };

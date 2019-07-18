@@ -74,9 +74,8 @@ Sprite.Ticker = ({ update }: { update: (sprite: PIXI.Sprite) => void }) => {
   const sprite = useSprite();
   useMemo(() => { update(sprite); }, []);
   useEffect(() => {
-    const refresh = (): void => update(sprite);
-    ticker.add(refresh);
-    return () => { ticker.remove(refresh); };
+    const sub = ticker.each((): void => update(sprite));
+    return () => sub.unsubscribe();
   }, []);
   return null;
 };

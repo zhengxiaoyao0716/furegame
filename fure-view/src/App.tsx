@@ -3,28 +3,32 @@ import * as PIXI from 'pixi.js';
 import { Frozen, useCloseable, useUpdate } from './hooks';
 import { RendererContext } from './Renderer';
 import { LoaderContext } from './Loader';
-import { StageContext } from './Stage';
-import { TickerContext, _patchPIXITicker } from './Ticker';
+import { Stage, StageContext } from './Stage';
+import { TickerController } from './Ticker';
 import { ViewContext, withView } from './UI/View';
+import { Ticker } from '@fure/core';
+
+type Application = { [P in Exclude<keyof PIXI.Application, 'ticker'>]: PIXI.Application[P] };
 
 interface Props {
   children?: ReactNode;
   create?: Frozen<(view?: HTMLCanvasElement) => PIXI.Application>;
+  ticker?: Frozen<Ticker>;
   resizeTo?: Window | HTMLElement;
 }
 
-export const AppContext = createContext(undefined as PIXI.Application | undefined);
+export const AppContext = createContext(undefined as Application | undefined);
 AppContext.displayName = 'App';
 
 export type AppOptions = ConstructorParameters<typeof PIXI.Application>[0];
 export const App = withView(
   'App',
-  ({ children, create, resizeTo }: Props): ReactElement => {
+  ({ children, create, ticker = Ticker.shared, resizeTo }: Props): ReactElement => {
     const view = useContext(ViewContext);
     const app = useCloseable(() => {
-      const app = create ? create(view) : new PIXI.Application({ view });
-      _patchPIXITicker(app.ticker);
-      return app;
+      const app = (create ? create(view) : new PIXI.Application({ view })) as PIXI.Application | { ticker: null };
+      app.ticker = null;
+      return app as Application;
     });
 
     useUpdate(() => {
@@ -39,9 +43,10 @@ export const App = withView(
         <LoaderContext.Provider value={app.loader}>
           <RendererContext.Provider value={app.renderer}>
             <StageContext.Provider value={app.stage}>
-              <TickerContext.Provider value={app.ticker}>
+              <TickerController ticker={ticker}>
                 {children}
-              </TickerContext.Provider>
+                <Stage.TickRefresh />
+              </TickerController>
             </StageContext.Provider>
           </RendererContext.Provider>
         </LoaderContext.Provider>
@@ -53,4 +58,4 @@ export const App = withView(
   },
 );
 
-export const useApp = (): PIXI.Application => useContext(AppContext) as PIXI.Application;
+export const useApp = (): Application => useContext(AppContext) as Application;
