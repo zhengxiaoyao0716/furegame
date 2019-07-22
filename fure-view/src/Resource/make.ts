@@ -93,44 +93,4 @@ export const makeResource = {
     };
   },
   text: (value: string, style?: PIXI.TextStyle) => makeResource.draw(new PIXI.Text(value, style)),
-  // spritesheet: () => {
-  //     const canvas = document.createElement('canvas');
-  //     // TODO draw spritesheet.
-  //     const baseTexture = BaseTexture.fromCanvas(canvas);
-  //     const data = {};
-
-  //     const spritesheet = new Spritesheet(baseTexture, data);
-  //     return (id?: string, loader?: loaders.Loader) => {
-  //         if (id) {
-  //             if (loader) {
-  //                 const resource = new loaders.Resource(id, `#${id}`);
-  //                 loader.resources[id] = resource;
-  //                 resource.spritesheet = spritesheet;
-  //             }
-  //         }
-  //         return spritesheet;
-  //     };
-  // },
 };
-
-// type SpritesheetFrameData = {
-//     frame: { x: number, y: number, h: number, w: number },
-//     // rotated?: boolean,
-//     trimmed?: boolean,
-//     // spriteSourceSize?: { x: number, y: number, h: number, w: number },
-//     // sourceSize?: { h: number, w: number },
-// };
-// const spritesheetData = (width: number, height: number, scale = 1) => {
-//     const meta = {
-//         // image: imageName,
-//         size: { w: width, h: height },
-//         scale,
-//     };
-//     const frames: { [frameName: string]: FrameData } = {};
-//     const animations: { [animName: string]: string[] } = {}; // { animName -> [ ...frameName ] }
-//     return {
-//         meta,
-//         frames,
-//         animations,
-//     };
-// };

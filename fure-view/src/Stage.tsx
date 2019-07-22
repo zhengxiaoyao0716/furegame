@@ -1,4 +1,4 @@
-import React, { ReactElement, ReactNode, Ref, useCallback, useEffect, useRef } from 'react';
+import React, { ReactElement, ReactNode, useEffect, useRef } from 'react';
 import * as PIXI from 'pixi.js';
 import { ContainerContext, useContainer } from './Container';
 import { useCloseable } from './hooks';

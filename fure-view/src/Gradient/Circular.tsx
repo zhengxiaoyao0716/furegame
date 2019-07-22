@@ -13,7 +13,7 @@ interface CircularState {
 export interface Props extends CircularState {
   children?: (state: { x: number; y: number; angle: Radian } & CircularState) => ReactElement;
 }
-
+// TODO .
 const Circular = ({ position, rotate, frames, distance, direction, children }: Props): ReactElement | null => {
   const state = useMemo(() => [[0, rotate, frames, distance, direction, ...position], [rotate / frames]], [rotate, frames, distance, direction, ...position]);
   const decorate = (children?: Props['children']): ((state: number[][]) => ReactElement) | undefined => {

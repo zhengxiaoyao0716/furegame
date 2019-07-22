@@ -1,8 +1,7 @@
-import React, { ReactElement, ReactNode, createContext, useContext, useEffect, useMemo } from 'react';
+import React, { ReactElement, ReactNode, createContext, useContext } from 'react';
 import * as PIXI from 'pixi.js';
 import { useContainer } from '../Container';
 import { useCloseable, useUpdate } from '../hooks';
-import { useTicker } from '../Ticker';
 
 type Degree = number;
 type Radian = number;
@@ -67,15 +66,4 @@ export const Sprite = (props: SpriteProps): ReactElement => {
   });
 
   return withSprite(sprite, props);
-};
-
-Sprite.Ticker = ({ update }: { update: (sprite: PIXI.Sprite) => void }) => {
-  const ticker = useTicker();
-  const sprite = useSprite();
-  useMemo(() => { update(sprite); }, []);
-  useEffect(() => {
-    const sub = ticker.each((): void => update(sprite));
-    return () => sub.unsubscribe();
-  }, []);
-  return null;
 };

@@ -1,6 +1,6 @@
 import React, { useEffect, useMemo } from 'react';
 import { map, scan, throttleTime } from 'rxjs/operators';
-import { App, AppOptions, useObservable } from '@fure/view';
+import { App, AppOptions, useSubscribe } from '@fure/view';
 import './index.css';
 import { LogicDecoupling as core } from '../../main/core';
 import { Subject, interval } from 'rxjs';
@@ -30,7 +30,7 @@ const Player = ({ attr }: PlayerProps) => {
 };
 
 const Message = ({ value = [], show }: { value: [string, number][]; show: number }) => {
-  const now = useObservable(useMemo(() => interval(1000 / 30).pipe(map(() => new Date().getTime())), []), 0);
+  const now = useSubscribe(useMemo(() => interval(1000 / 30).pipe(map(() => new Date().getTime())), []), 0);
   const messages = value.map(([message, insertAt]): [string, number] => [message, now - insertAt]).filter(([, time]) => (time < show));
   return (
     <div className="Message">{messages.map(([message, time], index) => (
@@ -42,9 +42,9 @@ Message.queue = scan((queue: [[string, number]], message: string): [[string, num
 
 interface GameProps { player: PlayerProps & { name: string } }
 const Game = ({ player }: GameProps) => {
-  const life = useObservable(useMemo(() => core.pipe(pick('life')), []), 0);
-  const attr = useObservable(useMemo(() => core.pipe(pick('attr')), []));
-  const messages = useObservable(useMemo(() => core.pipe(pick('message')).pipe(Message.queue), []));
+  const life = useSubscribe(useMemo(() => core.pipe(pick('life')), []), 0);
+  const attr = useSubscribe(useMemo(() => core.pipe(pick('attr')), []));
+  const messages = useSubscribe(useMemo(() => core.pipe(pick('message')).pipe(Message.queue), []));
 
   useEffect(() => {
     core.events.join(player.name, player.attr);

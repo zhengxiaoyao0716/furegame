@@ -1,6 +1,7 @@
 import React, { ReactElement, ReactNode, createContext, useContext, useDebugValue, useEffect } from 'react';
-import { useUpdate } from './hooks';
+import { useUpdate } from '../hooks';
 import { Ticker } from '@fure/core';
+export * from './Subscribe';
 
 interface Props {
   ticker?: Ticker;

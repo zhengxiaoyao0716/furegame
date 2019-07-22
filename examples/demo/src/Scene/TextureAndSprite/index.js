@@ -1,7 +1,6 @@
 import React, { useMemo } from 'react';
-import { timer } from 'rxjs';
-import { map } from 'rxjs/operators';
-import { AnimatedSprite, Gradient, MovableSprite, Renderer, RendererOptions, Sprite, Stage, THColors, UI, makeResource, useCloseable, useObservable } from '@fure/view';
+import { map, throttleTime } from 'rxjs/operators';
+import { AnimatedSprite, Gradient, MovableSprite, Renderer, RendererOptions, Sprite, Stage, THColors, UI, makeResource, useCloseable, useSubscribe, useTicker } from '@fure/view';
 import { playerAnims, playerPath, useSelect } from '../helper';
 
 const options: RendererOptions = { width: 1920, height: 1080, backgroundColor: 0x66ccff };
@@ -27,25 +26,31 @@ const usages = {
       ],
       textures => textures.forEach(texture => texture.destroy()),
     );
-    Stage.TickRefresh(); // `Stage.XxxRefresh` could usage as react-hook too.
-    return (textures.map((_, index) => (
-      <AnimatedSprite key={index} textures={[...textures.slice(index), ...textures.slice(0, index)]} animationSpeed={0.1} position={randomPosition()} />
-    )));
+    return (
+      <>
+        <Stage.TickRefresh />
+        {textures.map((_, index) => (
+          <AnimatedSprite key={index} textures={[...textures.slice(index), ...textures.slice(0, index)]} animationSpeed={0.1} position={randomPosition()} />
+        ))}
+      </>
+    );
   },
   Moveable() {
-    const subject = useMemo(() => timer(0, 1000).pipe(map(index => playerPath[index % playerPath.length])), []);
-    const { position, velocity, gravity } = useObservable(subject, { position: [], velocity: [], gravity: [] });
+    const ticker = useTicker();
+
+    const subject = useMemo(() => ticker.pipe(throttleTime(1000)).pipe(map((_delta, index) => playerPath[index % playerPath.length])), []);
+    const { position: [x, y], velocity, gravity } = useSubscribe(subject, playerPath[0]);
 
     const textures = useMemo(() => MovableSprite.toUDLR(playerAnims.map(value => (
       makeResource.text(value, { fontFamily: ['monospace'], fontSize: 24 })())
     )), []);
 
+    Stage.TickRefresh(); // `Stage.XxxRefresh` could usage as react-hook too.
+
     return (
-      <Gradient {...Gradient.Velocity([position, velocity, gravity])}>{([[x, y], [vx, vy]]) =>
-        <MovableSprite {...MovableSprite.UDLR} textures={textures} position={{ x: x + 510, y: y + 90 }} velocity={{ vx, vy }} animationSpeed={0.1}>
-          <Stage.LazyRefresh />
-        </MovableSprite>
-      }</Gradient>
+      <Gradient {...Gradient.Velocity([[560 + x, 140 + y], velocity, gravity])}>{pipe => (
+        <MovableSprite source={pipe} {...MovableSprite.UDLR} textures={textures} animationSpeed={0.1} />
+      )}</Gradient>
     );
   },
 };

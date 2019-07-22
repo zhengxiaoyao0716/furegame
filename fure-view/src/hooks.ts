@@ -1,7 +1,6 @@
 /** utility hooks. */
 
-import { DependencyList, EffectCallback, useDebugValue, useEffect, useMemo, useState } from 'react';
-import { Observable } from 'rxjs';
+import { DependencyList, EffectCallback, useEffect, useMemo, useState } from 'react';
 
 type Closeable = | { destroy: () => void } | { remove: () => void } | { close: () => void };
 
@@ -40,14 +39,4 @@ export const useUpdate: typeof useEffect = (
 ): void => {
   useMemo(update, []);
   useEffect(update, deps);
-};
-
-export const useObservable = <T>(observable: Observable<T>, init?: T, deps = []): T | undefined => {
-  const [snapshot, setSnapshot] = useState(init);
-  useEffect(() => {
-    const subcription = observable.subscribe(snapshot => setSnapshot(snapshot));
-    return () => subcription.unsubscribe();
-  }, deps);
-  useDebugValue(snapshot, JSON.stringify);
-  return snapshot;
 };

@@ -15,7 +15,8 @@
     "build": "npm run build:dts && npm run build:src && npm run build:exp",
     "build:exp": "lerna run --parallel --scope @fure/examples-* build",
     "build:dts": "lerna exec --parallel --scope @fure/{core,main,view} -- tsc --emitDeclarationOnly --declarationMap",
-    "build:src": "lerna exec --parallel --scope @fure/{core,main,view} -- babel src -d lib --extensions \".js,.jsx,.ts,.tsx\" --config-file ../.babelrc --copy-files"
+    "build:src": "lerna exec --parallel --scope @fure/{core,main,view} -- babel src -d lib --extensions \".js,.jsx,.ts,.tsx\" --config-file ../.babelrc --copy-files",
+    "eslint": "eslint \"**/*{.js,.jsx,.ts,.tsx}\""
   },
   "devDependencies": {
     "@babel/cli": "^7.4.4",

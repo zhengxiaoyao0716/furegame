@@ -1,7 +1,7 @@
 import React, { useCallback, useEffect, useMemo } from 'react';
 import { timer } from 'rxjs';
 import { map } from 'rxjs/operators';
-import { App, AppOptions, BLEND_MODES, Container, Sprite, makeResource, useCloseable, useTicker } from '@fure/view';
+import { App, AppOptions, BLEND_MODES, Container, Sprite, SpriteContext, Subscribe, makeResource, useCloseable, useTicker } from '@fure/view';
 
 const options: AppOptions = { width: 1920, height: 1080, backgroundColor: 0x66ccff };
 const birth = { x: options.width / 2, y: options.height / 2 };
@@ -38,12 +38,8 @@ const Particle = () => {
   //#endregion
 
   // hight frequence update, used only when necessary, for most time, just use `Gradient` to make our code more `reactive`.
-  const update = useCallback(index => (sprite) => {
-    if (!particles[index]) {
-      sprite.visible = false;
-      return;
-    }
-    sprite.visible = true;
+  const update = useCallback((index, sprite) => {
+    if (!particles[index]) return;
     const { cos, sin, scale, tint, sendAt } = particles[index];
     const distance = (ticker.runTime - sendAt) * speed;
     const position = { x: birth.x + cos * distance, y: birth.y + sin * distance };
@@ -57,7 +53,9 @@ const Particle = () => {
   return (
     <Container>{new Array(size).fill().map((_, index) => (
       <Sprite key={index} texture={texture} blendMode={BLEND_MODES.ADD}>
-        <Sprite.Ticker update={update(index)} />
+        <SpriteContext.Consumer>{sprite => (
+          <Subscribe source={ticker.pipe} update={() => update(index, sprite)}/>
+        )}</SpriteContext.Consumer>
       </Sprite>
     ))}</Container>
   );

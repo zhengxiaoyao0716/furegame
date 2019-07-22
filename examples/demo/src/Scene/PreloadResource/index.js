@@ -1,17 +1,22 @@
-import React, { ReactElement, useMemo } from 'react';
-import { App, Gradient, Progress, Sprite, THColors, Texture, UI, useObservable, useResource } from '@fure/view';
+import React, { ReactElement, Ref, useMemo, useRef } from 'react';
+import { App, Gradient, Progress, Sprite, Subscribe, THColors, Texture, UI, useResource, useSubscribe } from '@fure/view';
 import { of, timer } from 'rxjs';
 import { delay, map, mergeMap, take } from 'rxjs/operators';
 import { useSelect } from '../helper';
 
-const Loading = ({ progress, resource }: IndicatorProps) => (
-  <UI>
-    <Gradient {...Gradient.Simple(progress)}>{state =>
-      <div style={{ position: 'absolute', width: `${state}%`, height: 6, left: 0, bottom: '6%', background: THColors.Reimu.hex }} />
-    }</Gradient>
-    <small style={{ position: 'absolute', right: '1em', bottom: '6%' }}>{progress.toFixed(2)}% | {resource ? resource.name : 'waiting'} {resource && resource.error && 'failed'}</small>
-  </UI>
-);
+const Loading = ({ progress, resource }: IndicatorProps) => {
+  const ref: Ref<HTMLDivElement> = useRef();
+  return (
+    <UI>
+      <Gradient {...Gradient.Simple(progress)}>{pipe =>
+        <div ref={ref} style={{ position: 'absolute', width: '1%', height: 6, left: 0, bottom: '6%', background: THColors.Reimu.hex }}>
+          <Subscribe source={pipe} update={state => ref.current.style.width = `${state}%`} />
+        </div>
+      }</Gradient>
+      <small style={{ position: 'absolute', right: '1em', bottom: '6%' }}>{progress.toFixed(2)}% | {resource ? resource.name : 'waiting'} {resource && resource.error && 'failed'}</small>
+    </UI>
+  );
+};
 
 const size = {
   get width() { return document.body.clientWidth; },
@@ -33,7 +38,7 @@ const copies = (x: number, y: number) => (children: (x: number, y: number, index
 
 const Reimu = ({ texture }: { texture: Texture }) => {
   const time = 3;
-  const [positionX] = useObservable(useShooter(time, 2), [0, 0]);
+  const [positionX] = useSubscribe(useShooter(time, 2), [0, 0]);
 
   const velocityX = size.width / time / 1000; // v = s / t;
 
@@ -46,7 +51,7 @@ const Reimu = ({ texture }: { texture: Texture }) => {
 
 const Marisa = ({ texture }: { texture: Texture }) => {
   const time = 3;
-  const [positionX] = useObservable(useShooter(time, 3), [0, 0]);
+  const [positionX] = useSubscribe(useShooter(time, 3), [0, 0]);
 
   const velocityX = size.width / time / 1000; // v = s / t;
   const velocityY = -400 / 1000;
@@ -63,14 +68,14 @@ const Marisa = ({ texture }: { texture: Texture }) => {
 const Alice = ({ texture }: { texture: Texture }) => {
   const time = 3;
   const turn = 6;
-  const [positionX, index] = useObservable(useShooter(time, turn), [0, 0]);
+  const [positionX, index] = useSubscribe(useShooter(time, turn), [0, 0]);
 
   const rotate = (index % 2 === 0 ? 1 : -1) / 3 * Math.PI;
   const frames = time * 1000 / turn;
   const distance = size.width / turn;
   const direction = 0;
 
-  return (
+  return ( // TODO .
     <Gradient.Circular rotate={rotate} frames={frames} distance={distance} direction={direction} position={[positionX + 400, 250]}>{({ x, y, angle }) => (copies(x, y)((x, y, index) => (
       <Sprite key={index} texture={texture} position={{ x, y }} rotation={{ radian: 0.5 * Math.PI + angle }} />
     )))}</Gradient.Circular>

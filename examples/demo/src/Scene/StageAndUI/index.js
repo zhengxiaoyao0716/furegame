@@ -1,6 +1,6 @@
 import React, { ReactNode, useMemo } from 'react';
 import { debounceTime, map } from 'rxjs/operators';
-import { App, Loader, Renderer, Stage, TickerController, UI, fromResize, useObservable } from '@fure/view';
+import { App, Loader, Renderer, Stage, TickerController, UI, fromResize, useSubscribe } from '@fure/view';
 import './index.css';
 import { useSelect } from '../helper';
 import { Ticker } from '@fure/core';
@@ -22,7 +22,7 @@ const usages = {
     );
   },
   Advance({ children }: { children: ReactNode }) {
-    const size = useObservable(useMemo(() => fromResize(document.body).pipe(debounceTime(100), map(bodySize)), []), bodySize());
+    const size = useSubscribe(useMemo(() => fromResize(document.body).pipe(debounceTime(100), map(bodySize)), []), bodySize());
     return (
       <Loader> {/* `Loader` is optional */}
         <div style={{ position: 'absolute', width: '100%', height: '100%', textAlign: 'center' }}>

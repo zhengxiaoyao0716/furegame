@@ -1,4 +1,4 @@
-import { ReactElement } from 'react';
+import React, { ReactElement, createContext, useContext } from 'react';
 import * as PIXI from 'pixi.js';
 import { useContainer } from '../Container';
 import { Frozen, useCloseable, useUpdate } from '../hooks';
@@ -13,12 +13,17 @@ export interface AnimatedSpriteProps extends SpriteProps {
   animationSpeed?: number;
 }
 
+export const AnimatedSpriteContext = createContext(undefined as PIXI.AnimatedSprite | undefined);
+AnimatedSpriteContext.displayName = 'AnimatedSprite';
+export const useSprite = (): PIXI.Sprite => useContext(AnimatedSpriteContext) as PIXI.Sprite;
+
 export const AnimatedSprite = ({
   textures,
   autoUpdate,
   playing = true,
   loop = true,
   animationSpeed = 1,
+  children,
   ...props
 }: AnimatedSpriteProps): ReactElement => {
   const container = useContainer();
@@ -38,5 +43,9 @@ export const AnimatedSprite = ({
     if (animationSpeed !== sprite.animationSpeed) sprite.animationSpeed = animationSpeed;
   }, [textures, playing, loop, animationSpeed]);
 
-  return withSprite(sprite, props);
+  return withSprite(sprite, {
+    ...props, children: (
+      <AnimatedSpriteContext.Provider value={sprite}>{children}</AnimatedSpriteContext.Provider>
+    ),
+  });
 };

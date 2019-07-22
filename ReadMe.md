@@ -5,8 +5,7 @@
 - **NOT PREPARE FOR PUBLISH**
 - **还没准备好正式发布**
 
-## TODO 整理当前阶段内容并重构.
-> 核心优化 `Sprite` 的高频更新机制，着重调整 `Gradient` 与物理引擎模块，两者当前的用法有交叉。
+- TODO 迁移 `Gradient.Circular` 到新机制上，`Matter` 的内部时钟需要与 `Ticker` 同步。
 
 ***
 ## The Design // 愿景

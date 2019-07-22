@@ -16,6 +16,7 @@ export const World = ({ children, element, options }: Props): ReactElement => {
   const renderer = useRenderer();
   const world = useCloseable(() => {
     const engine = Matter.Engine.create();
+    // TODO .
     const render = Matter.Render.create({
       engine,
       element: element === 'debug' ? renderer.view.parentElement as HTMLElement : element || undefined,

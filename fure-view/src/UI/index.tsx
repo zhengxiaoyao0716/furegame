@@ -4,7 +4,7 @@ import * as PIXI from 'pixi.js';
 import './index.css';
 import { fromResize } from './resize';
 import { useRenderer } from '../Renderer';
-import { useObservable } from '../hooks';
+import { useSubscribe } from '../Ticker';
 
 // export * from './View'; // `View` should auto created by `Render` or `App`, should not exports to developer.
 
@@ -34,7 +34,7 @@ export const UI = ({ id, className = '', style: outerStyle, children, scaleMode 
       .pipe(debounceTime(100))
       .pipe(map(_ => styleOf(renderer, scaleMode)))
   ), []);
-  const builtinStyle = useObservable(styleEvent, useMemo(() => styleOf(renderer, scaleMode), []));
+  const builtinStyle = useSubscribe(styleEvent, useMemo(() => styleOf(renderer, scaleMode), []));
   const style = useMemo(() => ({ ...outerStyle, ...builtinStyle }), [outerStyle, builtinStyle]);
   return (
     <div id={id} className={`${className && `${className} `}UI`} style={style}>{children}</div>
