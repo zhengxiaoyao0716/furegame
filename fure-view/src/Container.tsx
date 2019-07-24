@@ -1,4 +1,4 @@
-import React, { ReactElement, ReactNode, createContext, useContext } from 'react';
+import React, { ForwardRefExoticComponent, MutableRefObject, ReactElement, ReactNode, Ref, RefAttributes, createContext, forwardRef, useContext } from 'react';
 import * as PIXI from 'pixi.js';
 import { useCloseable } from './hooks';
 
@@ -10,17 +10,28 @@ export const ContainerContext = createContext(undefined as PIXI.Container | unde
 ContainerContext.displayName = 'Container';
 export const useContainer = (): PIXI.Container => useContext(ContainerContext) as PIXI.Container;
 
-const withContainer = (container: PIXI.Container, { children }: Props): ReactElement => {
-  const parent = useContainer();
-  parent && parent.addChild(container);
-  return <ContainerContext.Provider value={container}>{children}</ContainerContext.Provider>;
+const createContainer = (displayName: string, constructor: new () => PIXI.Container): ForwardRefExoticComponent<Props & RefAttributes<PIXI.Container>> => {
+  const Container = ({ children }: Props, ref: Ref<PIXI.Container>): ReactElement => {
+    const parent = useContainer();
+    const setRef = ref ? (container: PIXI.Container | null) => {
+      if ('current' in ref) (ref as MutableRefObject<PIXI.Container | null>).current = container;
+      else if (ref instanceof Function) ref(container);
+    } : () => { };
+    const container = useCloseable(() => {
+      const container = new constructor();
+      parent && parent.addChild(container);
+      setRef(container);
+      return container;
+    }, container => {
+      setRef(null);
+      parent && parent.removeChild(container);
+      container.destroy();
+    });
+    return <ContainerContext.Provider value={container}>{children}</ContainerContext.Provider>;
+  };
+  Container.displayName = displayName;
+  return forwardRef(Container);
 };
 
-export const Container = ({ ...props }: Props): ReactElement => {
-  const container = useCloseable(() => new PIXI.Container());
-  return withContainer(container, props);
-};
-Container.Particle = ({ ...props }: Props): ReactElement => {
-  const container = useCloseable(() => new PIXI.ParticleContainer());
-  return withContainer(container, props);
-};
+export const Container = createContainer('Container', PIXI.Container);
+export const ParticleContainer = createContainer('Container', PIXI.ParticleContainer);

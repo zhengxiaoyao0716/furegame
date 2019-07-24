@@ -1,11 +1,13 @@
-import { useCallback } from 'react';
-import { GradientFn, PointsFn } from '.';
+import { ReactElement, useCallback } from 'react';
+import { ChildrenFn, GradientFn, PointsFn, useGradient } from './Gradient';
 
-const simplePointsFn = (state: number): PointsFn<{ state: number; time: number }> => (
+interface State { state: number; time: number }
+
+const simplePointsFn = (state: number): PointsFn<State> => (
   (ticker, points) => [{ state, time: ticker.now }, ...points.slice(0, 1)]
 );
 
-const simpleGradientFn = (): GradientFn<{ state: number; time: number }, number> => (
+const simpleGradientFn = (): GradientFn<State, number> => (
   (ticker, [point0, point1], state) => {
     if (point1 == null) return 0;
     if (state === point0.state) return point0.state;
@@ -17,8 +19,14 @@ const simpleGradientFn = (): GradientFn<{ state: number; time: number }, number>
   }
 );
 
-export default (state: number) => {
+export const simpleFn = (state: number): [PointsFn<State>, GradientFn<State, number>] => {
   const pointsFn = useCallback(simplePointsFn(state), [state]);
   const gradientFn = useCallback(simpleGradientFn(), []);
-  return { pointsFn, gradientFn };
+  return [pointsFn, gradientFn];
 };
+
+export const Simple = ({ children, state }: { children: ChildrenFn<number>; state: number }): ReactElement => {
+  const pipe = useGradient(...simpleFn(state));
+  return children(pipe);
+};
+Simple.displayName = 'Gradient.Simple';

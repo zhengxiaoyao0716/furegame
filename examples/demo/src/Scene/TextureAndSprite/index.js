@@ -38,7 +38,7 @@ const usages = {
   Moveable() {
     const ticker = useTicker();
 
-    const subject = useMemo(() => ticker.pipe(throttleTime(1000)).pipe(map((_delta, index) => playerPath[index % playerPath.length])), []);
+    const subject = useMemo(() => ticker.pipe(throttleTime(1000)).pipe(map((_delta, index) => playerPath[index % playerPath.length])), [ticker]);
     const { position: [x, y], velocity, gravity } = useSubscribe(subject, playerPath[0]);
 
     const textures = useMemo(() => MovableSprite.toUDLR(playerAnims.map(value => (
@@ -48,9 +48,9 @@ const usages = {
     Stage.TickRefresh(); // `Stage.XxxRefresh` could usage as react-hook too.
 
     return (
-      <Gradient {...Gradient.Velocity([[560 + x, 140 + y], velocity, gravity])}>{pipe => (
+      <Gradient.Velocity state={[[560 + x, 140 + y], velocity, gravity]}>{pipe => (
         <MovableSprite source={pipe} {...MovableSprite.UDLR} textures={textures} animationSpeed={0.1} />
-      )}</Gradient>
+      )}</Gradient.Velocity>
     );
   },
 };

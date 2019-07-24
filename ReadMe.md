@@ -5,7 +5,7 @@
 - **NOT PREPARE FOR PUBLISH**
 - **还没准备好正式发布**
 
-- TODO 迁移 `Gradient.Circular` 到新机制上，`Matter` 的内部时钟需要与 `Ticker` 同步。
+- TODO `Matter` 的内部时钟需要与 `Ticker` 同步。
 
 ***
 ## The Design // 愿景

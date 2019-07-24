@@ -21,6 +21,7 @@ const Particle = () => {
   //#region particles shooter
   const particles = useMemo(() => [], []);
   useEffect(() => {
+    // TODO 不用模拟实际的生成过程，只需要知道每一帧生成了哪些新粒子就够了，这样的话应该能突破4ms限制.
     const emitter = timer(0, period).pipe(map(() => Math.random() * 2 * Math.PI))
       .pipe(map(angle => ({
         cos: Math.cos(angle),

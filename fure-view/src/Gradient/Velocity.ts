@@ -1,5 +1,5 @@
-import { useCallback } from 'react';
-import { GradientFn, PointsFn } from '.';
+import { ReactElement, useCallback } from 'react';
+import { ChildrenFn, GradientFn, PointsFn, useGradient } from './Gradient';
 
 type State = number[][];
 
@@ -18,9 +18,15 @@ const velocityGradientFn = (): GradientFn<State, State> => (
   }
 );
 
-export default (state: State) => {
+export const velocityFn = (state: State): [PointsFn<State>, GradientFn<State, State>] => {
   const deps = state.map(vector => vector.join(','));
   const pointsFn: PointsFn<State> = useCallback(() => [state], deps);
   const gradientFn = useCallback(velocityGradientFn(), deps);
-  return { pointsFn, gradientFn };
+  return [pointsFn, gradientFn];
 };
+
+export const Velocity = ({ children, state }: { children: ChildrenFn<State>; state: State }): ReactElement => {
+  const pipe = useGradient(...velocityFn(state));
+  return children(pipe);
+};
+Velocity.displayName = 'Gradient.Velocity';

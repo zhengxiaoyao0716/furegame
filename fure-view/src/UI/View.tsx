@@ -1,4 +1,4 @@
-import React, { CSSProperties, ComponentType, PropsWithChildren, ReactElement, createContext, useCallback, useState } from 'react';
+import React, { CSSProperties, ComponentType, ForwardRefExoticComponent, MutableRefObject, PropsWithChildren, ReactElement, Ref, RefAttributes, createContext, forwardRef, useCallback, useState } from 'react';
 import './View.css';
 
 export interface ViewProps {
@@ -8,9 +8,15 @@ export interface ViewProps {
 export const ViewContext = createContext(undefined as HTMLCanvasElement | undefined);
 ViewContext.displayName = 'View';
 
-const View = ({ id, className = '', style, children }: PropsWithChildren<ViewProps>): ReactElement => {
+const View = ({ id, className = '', style, children }: PropsWithChildren<ViewProps>, ref: Ref<HTMLCanvasElement>): ReactElement => {
   const [view, setView] = useState(undefined as HTMLCanvasElement | undefined);
-  const canvasRef = useCallback(canvas => { canvas && setView(canvas); }, []);
+  const canvasRef = useCallback(canvas => {
+    canvas && setView(canvas);
+    if (ref) {
+      if ('current' in ref) (ref as MutableRefObject<HTMLCanvasElement>).current = canvas;
+      else if (ref instanceof Function) ref(canvas);
+    }
+  }, []);
   return (
     <div id={id} className={`${className && `${className} `}Furegame`} style={style}>
       <canvas ref={canvasRef} />
@@ -19,13 +25,13 @@ const View = ({ id, className = '', style, children }: PropsWithChildren<ViewPro
   );
 };
 
-export const withView = <P extends {}, E extends {}>(displayName: string, Component: ComponentType<P>, ext?: E): ComponentType<ViewProps & P> & E => {
+export const withView = <P extends {}, E extends {}>(displayName: string, Component: ComponentType<P>, ext?: E): ForwardRefExoticComponent<ViewProps & P & RefAttributes<HTMLCanvasElement>> & E => {
   Component.displayName = displayName;
-  const WithView = ({ id, className, style, ...props }: ViewProps & P): ReactElement | null => (
-    View({ id, className, style, children: <Component {...props as P} /> })
+  const WithView = ({ id, className, style, ...props }: ViewProps & P, ref: Ref<HTMLCanvasElement>): ReactElement | null => (
+    View({ id, className, style, children: <Component {...props as P} /> }, ref)
   );
   WithView.displayName = `${displayName}.View`;
-  const WithExt = WithView as ComponentType<ViewProps & P> & E;
+  const WithExt = forwardRef(WithView) as ForwardRefExoticComponent<ViewProps & P & RefAttributes<HTMLCanvasElement>> & E;
   ext && Object.entries(ext).forEach(([name, value]) => {
     WithExt[name as keyof E] = value as any; // eslint-disable-line @typescript-eslint/no-explicit-any
   });

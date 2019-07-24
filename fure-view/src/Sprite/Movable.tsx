@@ -2,39 +2,63 @@ import React, { ReactElement } from 'react';
 import * as PIXI from 'pixi.js';
 import { AnimatedSprite, AnimatedSpriteProps } from '.';
 import { Subscribe, SubscribeProps } from '../Ticker';
-import { AnimatedSpriteContext } from './Animated';
+import { SpriteContext } from './Sprite';
 
 type ProtoExntends<T, U> = U & { [P in Exclude<keyof T, keyof U>]: T[P]; };
 
-interface MovableSpritePropsExtends {
-  animId: string | ((vx: number, vy: number) => string);
-  textures: { [animId: string]: PIXI.Texture[] };
+//#region Free direction move
+
+interface FreeMoveSpritePropsExtends {
   position?: undefined;
-  source: SubscribeProps<[[number, number], [number, number]]>['source'];
+  rotation?: undefined;
+  textures: PIXI.Texture[];
+  source: SubscribeProps<Required<Pick<AnimatedSpriteProps, | 'position' | 'rotation'>>>['source'];
+}
+export type FreeMoveSpriteProps = ProtoExntends<AnimatedSpriteProps, FreeMoveSpritePropsExtends>;
+
+export const FreeMoveSprite = ({ textures, source, children, ...props }: FreeMoveSpriteProps): ReactElement => (
+  <AnimatedSprite {...props} textures={textures}>
+    {children}
+    <SpriteContext.Consumer>{(sprite) => sprite instanceof PIXI.AnimatedSprite && (
+      <Subscribe source={source} update={({ position, rotation }) => {
+        sprite.position.x = position.x;
+        sprite.position.y = position.y;
+        if ('degree' in rotation && rotation.degree !== sprite.angle) sprite.angle = rotation.degree;
+        else if ('radian' in rotation && rotation.radian !== sprite.rotation) sprite.rotation = rotation.radian;
+      }} />
+    )}</SpriteContext.Consumer>
+  </AnimatedSprite>
+);
+//#endregion
+
+//#region limited direction move
+
+interface MovableSpritePropsExtends {
+  position?: undefined;
+  animId?: undefined | string | ((vx: number, vy: number) => string);
+  textures: PIXI.Texture[] | { [animId: string]: PIXI.Texture[] };
+  source: SubscribeProps<number[][]>['source'];
 }
 export type MovableSpriteProps = ProtoExntends<AnimatedSpriteProps, MovableSpritePropsExtends>;
 
 export const MovableSprite = ({ animId, textures, source, children, ...props }: MovableSpriteProps): ReactElement => {
   const id = animId instanceof Function ? animId(0, 0) : animId;
-  return AnimatedSprite({
-    ...props, textures: textures[id],
-    children: (
-      <>
-        {children}
-        <AnimatedSpriteContext.Consumer>{sprite => (
-          sprite && <Subscribe source={source} update={([[x, y], [vx, vy]]) => {
-            sprite.position.x = x;
-            sprite.position.y = y;
-            const id = animId instanceof Function ? animId(vx, vy) : animId;
-            if (textures[id] === sprite.textures) return;
-            const playing = sprite.playing;
-            sprite.textures = textures[id];
-            playing && sprite.play();
-          }} />
-        )}</AnimatedSpriteContext.Consumer>
-      </>
-    ),
-  });
+  return (
+    <AnimatedSprite {...props} textures={id === undefined ? (textures as PIXI.Texture[]) : (textures as Record<string, PIXI.Texture[]>)[id]}>
+      {children}
+      <SpriteContext.Consumer>{(sprite) => sprite instanceof PIXI.AnimatedSprite && (
+        <Subscribe source={source} update={([[x, y], velocity]) => {
+          sprite.position.x = x;
+          sprite.position.y = y;
+          const id = animId instanceof Function ? animId(...velocity as [number, number]) : animId;
+          if (id === undefined || (textures as Record<string, PIXI.Texture[]>)[id] === sprite.textures) return;
+          const playing = sprite.playing;
+          sprite.textures = (textures as Record<string, PIXI.Texture[]>)[id];
+          playing && sprite.play();
+        }} />
+      )}</SpriteContext.Consumer>
+    </AnimatedSprite>
+  );
 };
 
 MovableSprite.UDLR = {
@@ -47,3 +71,4 @@ MovableSprite.toUDLR = (textures: PIXI.Texture[], eachSize = 2) => ({
   left: textures.slice(3 * eachSize, 4 * eachSize),
   right: textures.slice(4 * eachSize, 5 * eachSize),
 });
+//#endregion
