@@ -2,6 +2,7 @@ import React, { ReactElement, ReactNode, createContext, useContext } from 'react
 import * as Matter from 'matter-js';
 import { useRenderer } from '../Renderer';
 import { useCloseable } from '../hooks';
+import { useTicker } from '../Ticker';
 
 interface Props {
   children?: ReactNode;
@@ -14,9 +15,9 @@ WorldContext.displayName = 'World';
 
 export const World = ({ children, element, options }: Props): ReactElement => {
   const renderer = useRenderer();
+  const ticker = useTicker();
   const world = useCloseable(() => {
     const engine = Matter.Engine.create();
-    // TODO .
     const render = Matter.Render.create({
       engine,
       element: element === 'debug' ? renderer.view.parentElement as HTMLElement : element || undefined,
@@ -26,8 +27,8 @@ export const World = ({ children, element, options }: Props): ReactElement => {
         ...options,
       },
     });
-    Matter.Engine.run(engine);
-    Matter.Render.run(render);
+    if (element != undefined) Matter.Render.run(render);
+    ticker.each(delta => Matter.Engine.update(engine, delta));
     return engine.world;
   });
   return (

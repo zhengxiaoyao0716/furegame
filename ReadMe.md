@@ -5,7 +5,7 @@
 - **NOT PREPARE FOR PUBLISH**
 - **还没准备好正式发布**
 
-- TODO `Matter` 的内部时钟需要与 `Ticker` 同步。
+- TODO 我需要的好像不是 `React`，而是 `JSX`、`Hooks` 和 `ReactiveX`。
 
 ***
 ## The Design // 愿景

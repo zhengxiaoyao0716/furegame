@@ -1,13 +1,13 @@
 import React, { useCallback, useEffect, useMemo } from 'react';
-import { timer } from 'rxjs';
-import { map } from 'rxjs/operators';
+import { range } from 'rxjs';
+import { map, mergeMap } from 'rxjs/operators';
 import { App, AppOptions, BLEND_MODES, Container, Sprite, SpriteContext, Subscribe, makeResource, useCloseable, useTicker } from '@fure/view';
 
 const options: AppOptions = { width: 1920, height: 1080, backgroundColor: 0x66ccff };
 const birth = { x: options.width / 2, y: options.height / 2 };
 const size = 1000; // lived particles number.
-const period = 4; // send particles interval. [NOTICE: period >= 4ms](https://developer.mozilla.org/en-US/docs/Web/API/WindowOrWorkerGlobalScope/setTimeout#Reasons_for_delays_longer_than_specified)
-const speed = 0.2; // particle move speed, 1000px/s.
+const period = 1; // send particles interval.
+const speed = 0.5; // particle move speed, 1000px/s.
 // distanceMax = size * period * speed
 
 const Particle = () => {
@@ -19,17 +19,23 @@ const Particle = () => {
   const ticker = useTicker();
 
   //#region particles shooter
-  const particles = useMemo(() => [], []);
+  const particles: { cos: number; sin: number; scale: number; tint: number; sendAt: number }[] = useMemo(() => [], []);
   useEffect(() => {
-    // TODO 不用模拟实际的生成过程，只需要知道每一帧生成了哪些新粒子就够了，这样的话应该能突破4ms限制.
-    const emitter = timer(0, period).pipe(map(() => Math.random() * 2 * Math.PI))
-      .pipe(map(angle => ({
-        cos: Math.cos(angle),
-        sin: Math.sin(angle),
-        scale: 0.5 + Math.random(),
-        tint: Math.random() * 0xffffff | 0,
-        sendAt: ticker.runTime,
-      })));
+    const emitter = ticker.pipe(map(_delta => ticker.runTime))
+      .pipe(mergeMap(now => {
+        const last = particles[0] ? particles[0].sendAt : now - period;
+        const count = Math.floor((now - last) / period);
+        return range(1, count).pipe(map(index => {
+          const angle = Math.random() * 2 * Math.PI;
+          return ({
+            cos: Math.cos(angle),
+            sin: Math.sin(angle),
+            scale: 0.5 + Math.random(),
+            tint: Math.random() * 0xffffff | 0,
+            sendAt: last + (1 + index) * period,
+          });
+        }));
+      }));
     const subcription = emitter.subscribe(particle => {
       particles.unshift(particle);
       if (particles.length > size) particles.pop();
@@ -55,7 +61,7 @@ const Particle = () => {
     <Container>{new Array(size).fill().map((_, index) => (
       <Sprite key={index} texture={texture} blendMode={BLEND_MODES.ADD}>
         <SpriteContext.Consumer>{sprite => (
-          <Subscribe source={ticker.pipe} update={() => update(index, sprite)}/>
+          <Subscribe source={ticker.pipe} update={() => update(index, sprite)} />
         )}</SpriteContext.Consumer>
       </Sprite>
     ))}</Container>

@@ -31,7 +31,7 @@ const useShooter = (time: number, turn: number) => {
           .pipe(take(turn))
       ))
       .pipe(map(index => [index * size.width / turn, index])),
-    [time, turn],
+    [time, turn, ticker],
   );
 };
 
