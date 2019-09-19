@@ -1,6 +1,7 @@
-import React, { ForwardRefExoticComponent, MutableRefObject, ReactElement, ReactNode, Ref, RefAttributes, createContext, forwardRef, useContext } from 'react';
+import React, { ForwardRefExoticComponent, ReactElement, ReactNode, Ref, RefAttributes, createContext, forwardRef, useContext } from 'react';
 import * as PIXI from 'pixi.js';
 import { useCloseable } from './hooks';
+import { setRef } from './UI/View';
 
 interface Props {
   children?: ReactNode;
@@ -13,17 +14,13 @@ export const useContainer = (): PIXI.Container => useContext(ContainerContext) a
 const createContainer = (displayName: string, constructor: new () => PIXI.Container): ForwardRefExoticComponent<Props & RefAttributes<PIXI.Container>> => {
   const Container = ({ children }: Props, ref: Ref<PIXI.Container>): ReactElement => {
     const parent = useContainer();
-    const setRef = ref ? (container: PIXI.Container | null) => {
-      if ('current' in ref) (ref as MutableRefObject<PIXI.Container | null>).current = container;
-      else if (ref instanceof Function) ref(container);
-    } : () => { };
     const container = useCloseable(() => {
       const container = new constructor();
       parent && parent.addChild(container);
-      setRef(container);
+      setRef(ref, container);
       return container;
     }, container => {
-      setRef(null);
+      setRef(ref, null);
       parent && parent.removeChild(container);
       container.destroy();
     });

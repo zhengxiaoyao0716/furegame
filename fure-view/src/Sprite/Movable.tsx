@@ -4,17 +4,13 @@ import { AnimatedSprite, AnimatedSpriteProps } from '.';
 import { Subscribe, SubscribeProps } from '../Ticker';
 import { SpriteContext } from './Sprite';
 
-type ProtoExntends<T, U> = U & { [P in Exclude<keyof T, keyof U>]: T[P]; };
-
 //#region Free direction move
 
-interface FreeMoveSpritePropsExtends {
-  position?: undefined;
-  rotation?: undefined;
+type FreeMoveOverride = | 'position' | 'rotation';
+export interface FreeMoveSpriteProps extends Omit<AnimatedSpriteProps, FreeMoveOverride> {
   textures: PIXI.Texture[];
-  source: SubscribeProps<Required<Pick<AnimatedSpriteProps, | 'position' | 'rotation'>>>['source'];
+  source: SubscribeProps<Required<Pick<AnimatedSpriteProps, FreeMoveOverride>>>['source'];
 }
-export type FreeMoveSpriteProps = ProtoExntends<AnimatedSpriteProps, FreeMoveSpritePropsExtends>;
 
 export const FreeMoveSprite = ({ textures, source, children, ...props }: FreeMoveSpriteProps): ReactElement => (
   <AnimatedSprite {...props} textures={textures}>
@@ -33,13 +29,11 @@ export const FreeMoveSprite = ({ textures, source, children, ...props }: FreeMov
 
 //#region limited direction move
 
-interface MovableSpritePropsExtends {
-  position?: undefined;
+interface MovableSpriteProps extends Omit<AnimatedSpriteProps, | 'position' | 'textures'> {
   animId?: undefined | string | ((vx: number, vy: number) => string);
   textures: PIXI.Texture[] | { [animId: string]: PIXI.Texture[] };
   source: SubscribeProps<number[][]>['source'];
 }
-export type MovableSpriteProps = ProtoExntends<AnimatedSpriteProps, MovableSpritePropsExtends>;
 
 export const MovableSprite = ({ animId, textures, source, children, ...props }: MovableSpriteProps): ReactElement => {
   const id = animId instanceof Function ? animId(0, 0) : animId;

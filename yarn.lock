@@ -10058,6 +10058,11 @@ pnp-webpack-plugin@1.5.0:
   dependencies:
     ts-pnp "^1.1.2"
 
+poly-decomp@^0.3.0:
+  version "0.3.0"
+  resolved "https://registry.npm.taobao.org/poly-decomp/download/poly-decomp-0.3.0.tgz#aa499289bbc1a4ca2213e966587fa5bffc1ca5f5"
+  integrity sha1-qkmSibvBpMoiE+lmWH+lv/wcpfU=
+
 portfinder@^1.0.9:
   version "1.0.24"
   resolved "https://registry.npm.taobao.org/portfinder/download/portfinder-1.0.24.tgz#11efbc6865f12f37624b6531ead1d809ed965cfa"

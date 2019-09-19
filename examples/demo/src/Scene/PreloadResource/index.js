@@ -1,11 +1,11 @@
-import React, { ReactElement, Ref, useMemo, useRef } from 'react';
+import React, { MutableRefObject, ReactElement, useMemo, useRef } from 'react';
 import { App, FreeMoveSprite, Gradient, MovableSprite, Progress, Subscribe, THColors, Texture, UI, useResource, useSubscribe, useTicker } from '@fure/view';
 import { of } from 'rxjs';
 import { delay, map, mergeMap, sampleTime, startWith, take } from 'rxjs/operators';
 import { useSelect } from '../helper';
 
 const Loading = ({ progress, resource }: IndicatorProps) => {
-  const ref: Ref<HTMLDivElement> = useRef();
+  const ref: MutableRefObject<HTMLDivElement> = useRef();
   return (
     <UI>
       <Gradient.Simple state={progress}>{pipe =>

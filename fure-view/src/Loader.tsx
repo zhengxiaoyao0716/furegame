@@ -1,6 +1,6 @@
 import React, { ReactElement, ReactNode, createContext, useContext, useDebugValue, useMemo } from 'react';
 import * as PIXI from 'pixi.js';
-import { useCloseable, useUpdate } from './hooks';
+import { useCloseable } from './hooks';
 
 interface Props extends LoaderOptions {
   children?: ReactNode;
@@ -12,10 +12,8 @@ LoaderContext.displayName = 'Loader';
 export const Loader = ({ children, baseUrl, concurrency }: Props): ReactElement => {
   const loader = useCloseable(() => new PIXI.Loader(baseUrl, concurrency));
 
-  useUpdate(() => {
-    if (baseUrl != null && baseUrl !== loader.baseUrl) loader.baseUrl = baseUrl;
-    if (concurrency != null && concurrency !== loader.concurrency) loader.concurrency = concurrency;
-  }, []);
+  if (baseUrl != null && baseUrl !== loader.baseUrl) loader.baseUrl = baseUrl;
+  if (concurrency != null && concurrency !== loader.concurrency) loader.concurrency = concurrency;
 
   return <LoaderContext.Provider value={loader}>{children}</LoaderContext.Provider>;
 };

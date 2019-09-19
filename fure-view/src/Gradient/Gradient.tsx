@@ -10,7 +10,7 @@ export type ChildrenFn<S> = (pipe: Subject<S>['pipe']) => ReactElement;
 export function useGradient<P, S>(pointsFn: PointsFn<P>, gradientFn: GradientFn<P, S>): Subject<S>['pipe'] {
   const ticker = useTicker();
 
-  const points = useRef([] as P[]);
+  const points = useRef<P[]>([]);
   useEffect(() => {
     points.current = pointsFn(ticker, points.current);
   }, [pointsFn]);

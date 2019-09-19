@@ -1,6 +1,12 @@
 import React, { CSSProperties, ComponentType, ForwardRefExoticComponent, MutableRefObject, PropsWithChildren, ReactElement, Ref, RefAttributes, createContext, forwardRef, useCallback, useState } from 'react';
 import './View.css';
 
+export function setRef<T>(ref: Ref<T>, value: T): void {
+  if (ref == null) return;
+  if ('current' in ref) (ref as MutableRefObject<T>).current = value;
+  else if (ref instanceof Function) ref(value);
+}
+
 export interface ViewProps {
   id?: string; className?: string; style?: CSSProperties;
 }
@@ -12,10 +18,7 @@ const View = ({ id, className = '', style, children }: PropsWithChildren<ViewPro
   const [view, setView] = useState(undefined as HTMLCanvasElement | undefined);
   const canvasRef = useCallback(canvas => {
     canvas && setView(canvas);
-    if (ref) {
-      if ('current' in ref) (ref as MutableRefObject<HTMLCanvasElement>).current = canvas;
-      else if (ref instanceof Function) ref(canvas);
-    }
+    setRef(ref, canvas);
   }, []);
   return (
     <div id={id} className={`${className && `${className} `}Furegame`} style={style}>

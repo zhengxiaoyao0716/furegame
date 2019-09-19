@@ -4,7 +4,7 @@ import { defaultClose } from '../hooks';
 
 //#region fix fuck type
 export const Resource = PIXI.LoaderResource as { new(name: string, url: string | string[], options?: LoaderOptions): PIXI.LoaderResource };
-const Polygon = PIXI.Polygon as { new(...points: (PIXI.Point | number[])[]): PIXI.Polygon };
+const Polygon = PIXI.Polygon as unknown as { new(points: (PIXI.Point | number)[]): PIXI.Polygon };
 type Shape = Parameters<PIXI.Graphics['drawShape']>[0];
 //#endregion
 
@@ -75,8 +75,8 @@ export const makeResource = {
       ellipse(width: number, height: number) {
         return this.draw(new PIXI.Ellipse(border + width, border + height, width, height));
       },
-      polygon(...points: PIXI.Point[]) {
-        return this.draw(new Polygon(...points));
+      polygon(points: number[]) {
+        return this.draw(new Polygon(points));
       },
       rectangle(width: number, height: number) {
         return this.draw(new PIXI.Rectangle(border, border, width, height));
@@ -85,7 +85,7 @@ export const makeResource = {
         return this.draw(new PIXI.RoundedRectangle(border, border, width, height, radius));
       },
       triangle(width: number, height: number, sharp: number) {
-        return this.draw(new Polygon(new PIXI.Point(border + sharp, border), new PIXI.Point(border, border + height), new PIXI.Point(border + width, border + height)));
+        return this.draw(new Polygon([border + sharp, border, border, border + height, border + width, border + height]));
       },
       star(points: number, radius: number, innerRadius?: number, rotation?: number) {
         return this.draw(graphics => graphics.drawStar(border + radius, border + radius, points, radius, innerRadius, rotation));

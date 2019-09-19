@@ -1,7 +1,8 @@
-import React, { ForwardRefExoticComponent, MutableRefObject, ReactElement, ReactNode, Ref, RefAttributes, createContext, forwardRef, useContext } from 'react';
+import React, { ForwardRefExoticComponent, ReactElement, ReactNode, Ref, RefAttributes, createContext, forwardRef, useContext } from 'react';
 import * as PIXI from 'pixi.js';
 import { useContainer } from '../Container';
-import { useCloseable, useUpdate } from '../hooks';
+import { useCloseable } from '../hooks';
+import { setRef } from '../UI/View';
 
 type Degree = number;
 type Radian = number;
@@ -28,17 +29,13 @@ export const createSprite = <P extends SpriteProps, S extends PIXI.Sprite>(
 ): ForwardRefExoticComponent<P & RefAttributes<PIXI.Sprite>> => {
   const Sprite = (props: P, ref: Ref<PIXI.Sprite>): ReactElement => {
     const container = useContainer();
-    const setRef = ref ? (sprite: PIXI.Sprite | null) => {
-      if ('current' in ref) (ref as MutableRefObject<PIXI.Sprite | null>).current = sprite;
-      else if (ref instanceof Function) ref(sprite);
-    } : () => { };
     const sprite = useCloseable(() => {
       const sprite = supplier(props);
       container.addChild(sprite);
-      setRef(sprite);
+      setRef(ref, sprite);
       return sprite;
     }, sprite => {
-      setRef(null);
+      setRef(ref, null);
       container.removeChild(sprite);
       sprite.destroy();
     });
@@ -55,25 +52,24 @@ export const createSprite = <P extends SpriteProps, S extends PIXI.Sprite>(
       tint = 0xFFFFFF,
       blendMode,
     } = props;
-    useUpdate(() => {
-      if (texture != null && texture !== sprite.texture) sprite.texture = texture;
-      if (position && position !== sprite.position) sprite.position.set(position.x, position.y);
-      if (scale != null) {
-        const { x, y } = scale instanceof Object ? scale : { x: scale, y: scale };
-        if (x !== sprite.scale.x) sprite.scale.x = x;
-        if (y !== sprite.scale.y) sprite.scale.y = y;
-      }
-      if (anchor) {
-        if (anchor.x !== sprite.anchor.x) sprite.anchor.x = anchor.x;
-        if (anchor.y !== sprite.anchor.y) sprite.anchor.y = anchor.y;
-      }
-      if (rotation) {
-        if ('degree' in rotation && rotation.degree !== sprite.angle) sprite.angle = rotation.degree;
-        else if ('radian' in rotation && rotation.radian !== sprite.rotation) sprite.rotation = rotation.radian;
-      }
-      if (tint !== sprite.tint) sprite.tint = tint;
-      if (blendMode != null && blendMode !== sprite.blendMode) sprite.blendMode = blendMode;
-    }, [texture, position, scale, anchor, rotation]);
+
+    if (texture != null && texture !== sprite.texture) sprite.texture = texture;
+    if (position && position !== sprite.position) sprite.position.set(position.x, position.y);
+    if (scale != null) {
+      const { x, y } = scale instanceof Object ? scale : { x: scale, y: scale };
+      if (x !== sprite.scale.x) sprite.scale.x = x;
+      if (y !== sprite.scale.y) sprite.scale.y = y;
+    }
+    if (anchor) {
+      if (anchor.x !== sprite.anchor.x) sprite.anchor.x = anchor.x;
+      if (anchor.y !== sprite.anchor.y) sprite.anchor.y = anchor.y;
+    }
+    if (rotation) {
+      if ('degree' in rotation && rotation.degree !== sprite.angle) sprite.angle = rotation.degree;
+      else if ('radian' in rotation && rotation.radian !== sprite.rotation) sprite.rotation = rotation.radian;
+    }
+    if (tint !== sprite.tint) sprite.tint = tint;
+    if (blendMode != null && blendMode !== sprite.blendMode) sprite.blendMode = blendMode;
 
     return <SpriteContext.Provider value={sprite}>{children}</SpriteContext.Provider>;
   };

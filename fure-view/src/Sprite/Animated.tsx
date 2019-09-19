@@ -1,9 +1,8 @@
 import * as PIXI from 'pixi.js';
-import { Frozen, useUpdate } from '../hooks';
+import { Frozen } from '../hooks';
 import { SpriteProps, createSprite } from './Sprite';
 
-export interface AnimatedSpriteProps extends SpriteProps {
-  texture?: undefined; // disabled the `texture` field.
+export interface AnimatedSpriteProps extends Omit<SpriteProps, | 'texture'> { // disabled the `texture` field.
   textures: PIXI.Texture[] | PIXI.AnimatedSprite.FrameObject[];
   autoUpdate?: Frozen<boolean>;
   playing?: boolean;
@@ -20,10 +19,8 @@ export const AnimatedSprite = createSprite(
     loop = true,
     animationSpeed = 1,
   }) => {
-    useUpdate(() => {
-      if (textures !== sprite.textures) (sprite.textures as AnimatedSpriteProps['textures']) = textures;
-      if (playing !== sprite.playing) playing ? sprite.play() : sprite.stop();
-      if (loop !== sprite.loop) sprite.loop = loop;
-      if (animationSpeed !== sprite.animationSpeed) sprite.animationSpeed = animationSpeed;
-    }, [textures, playing, loop, animationSpeed]);
+    if (textures !== sprite.textures) (sprite.textures as AnimatedSpriteProps['textures']) = textures;
+    if (playing !== sprite.playing) playing ? sprite.play() : sprite.stop();
+    if (loop !== sprite.loop) sprite.loop = loop;
+    if (animationSpeed !== sprite.animationSpeed) sprite.animationSpeed = animationSpeed;
   });

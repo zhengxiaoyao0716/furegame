@@ -1,6 +1,6 @@
 /** utility hooks. */
 
-import { DependencyList, EffectCallback, useEffect, useMemo, useState } from 'react';
+import { DependencyList, RefObject, useEffect, useMemo, useRef, useState } from 'react';
 
 type Closeable = | { destroy: () => void } | { remove: () => void } | { close: () => void };
 
@@ -20,23 +20,28 @@ export const useCloseable = <T>(
 };
 
 export const useCloseableAsync = <T>(
-  supplier: Frozen<() => Promise<T>>,
+  supplier: Frozen<(closeRef: RefObject<boolean>) => Promise<T>>,
   close: (value: T) => void = defaultClose,
   deps: DependencyList = []
 ): T | undefined => {
+  const closeRef = useRef(false);
   const [state, setState] = useState(undefined as T | undefined);
   useEffect(() => {
-    const promise = Promise.resolve(supplier());
-    promise.then(setState);
-    return () => { promise.then(close); };
+    const promise = Promise.resolve(supplier(closeRef));
+    closeRef.current || promise.then(setState);
+    return () => {
+      closeRef.current = true;
+      promise.then(close);
+    };
   }, deps);
   return state;
 };
 
-export const useUpdate: typeof useEffect = (
-  update: EffectCallback,
-  deps: DependencyList = []
-): void => {
-  useMemo(update, []);
-  useEffect(update, deps);
-};
+// deprected.
+// export const useUpdate: typeof useEffect = (
+//   update: EffectCallback,
+//   deps: DependencyList = []
+// ): void => {
+//   useMemo(update, []);
+//   useEffect(update, deps);
+// };

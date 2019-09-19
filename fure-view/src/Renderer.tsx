@@ -1,6 +1,6 @@
 import React, { ReactElement, ReactNode, createContext, useContext, useMemo } from 'react';
 import * as PIXI from 'pixi.js';
-import { Frozen, useCloseable, useUpdate } from './hooks';
+import { Frozen, useCloseable } from './hooks';
 import { ViewContext, withView } from './UI/View';
 
 interface Props {
@@ -19,9 +19,7 @@ export const Renderer = withView(
     const view = useContext(ViewContext);
     const renderer = useCloseable(() => (create ? create(view) : new PIXI.Renderer({ view: view })));
 
-    useUpdate(() => {
-      if (width != null && height != null && (width !== renderer.width || height !== renderer.height)) renderer.resize(width, height);
-    }, [width, height]);
+    if (width != null && height != null && (width !== renderer.width || height !== renderer.height)) renderer.resize(width, height);
 
     return (<RendererContext.Provider value={renderer}>{children}</RendererContext.Provider>);
   },

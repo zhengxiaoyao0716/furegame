@@ -1,5 +1,5 @@
-import { Subject, Subscription, asyncScheduler } from 'rxjs';
-import { take, throttleTime } from 'rxjs/operators';
+import { Subject, Subscription, asyncScheduler, fromEvent } from 'rxjs';
+import { filter, take, throttleTime } from 'rxjs/operators';
 import { Core } from './Core';
 import { pick } from './rx';
 
@@ -115,11 +115,17 @@ export class Ticker {
       this.time.now = now;
       this.time.delta = 0;
       if (!this._running) return;
+      if (render.skipOnBack) {
+        render.skipOnBack = false;
+        console.info(`timer#${id} skipped a frame about ${delta}ms because the window has hide.`);
+        return;
+      }
       if (delta <= 0 || delta > 1000) return;
       this.time.delta = delta;
       this.time.run += delta;
       timer.next(delta);
     };
+
     render(0);
     this.pipe = timer.pipe.bind(timer);
     //#endregion
@@ -133,6 +139,13 @@ export class Ticker {
         .subscribe(_delta => core.events.sync(new Date().getTime() - this.time.now));
     } else {
       core.pipe(pick('time')).subscribe(({ offset }) => this.time.offset = new Date().getTime() - this.time.now - offset);
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const g = window as any; // eslint-disable-line no-undef
+      // listen visibility change event to skip the first frame after the window changed.
+      fromEvent(g, 'visibilitychange')
+        .pipe(filter(() => g.document.visibilityState === 'visible'))
+        .subscribe(_visibile => render.skipOnBack = true);
+      render.skipOnBack = false;
     }
     //#endregion
   }

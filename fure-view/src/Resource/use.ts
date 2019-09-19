@@ -3,6 +3,7 @@ import { Resource, makeResource } from './make';
 import { useDebugValue, useMemo } from 'react';
 import { useLoader } from '../Loader';
 import { useCloseableAsync } from '../hooks';
+import { timer } from 'rxjs';
 
 interface UseResourceLoad {
   url: string;
@@ -29,29 +30,29 @@ export const useResource = <T extends UseResourceOptions>(
   const loader = useLoader();
 
   const completed = useCloseableAsync(
-    (): Promise<boolean> => {
+    (closeRef): Promise<boolean> => {
       // tasks of making and loading resources
       const tasks = Object.entries(options)
         .map(([name, option]) => (
           option instanceof Function
             ? ( // make resource
               Promise.resolve(option(makeResource)) // make resource
-                .then(save => save(name, loader))   // save resource
-                .then(() => { loader.emit('load', loader, loader.resources[name]); }) // emit load succeed event
+                .then(save => closeRef.current || save(name, loader))   // save resource
+                .then(() => { closeRef.current || loader.emit('load', loader, loader.resources[name]); }) // emit load succeed event
                 .catch((error: Error) => {
                   if (loader.resources[name] == null) { // make failed resource
                     const resource = new Resource(name, `#${name}`);
                     resource.error = error;
                     loader.resources[name] = resource;
                   }
-                  loader.emit('error', error, loader, loader.resources[name]); // emit load failed event
+                  closeRef.current || loader.emit('error', error, loader, loader.resources[name]); // emit load failed event
                   throw error;
                 })
                 .finally(() => loader.emit('progress', loader, loader.resources[name])) //emit load finish event
             )
             : ( // load resource
               Promise.resolve(option)
-                .then(({ url, options, callback }) => { loader.add(name, url, options, callback); })
+                .then(({ url, options, callback }) => { closeRef.current || loader.add(name, url, options, callback); })
             )
         ));
 
@@ -63,11 +64,13 @@ export const useResource = <T extends UseResourceOptions>(
             get() { return loader.resources[name]; },
           },
         })).reduce((dict, props) => ({ ...dict, ...props }), {}));
-        return Promise.resolve((complete && complete(resource), true)).then(resolve);
+        return timer(0).toPromise() // the `width` and `height` has not set after first loaded, delay it to the next event loop.
+          .then(() => complete && complete(resource))
+          .then(() => resolve(true));
       };
 
       // waits all tasks finished
-      return Promise.all(tasks).then(() => new Promise(resolve => loader.load(onLoad(resolve))));
+      return Promise.all(tasks).then(() => closeRef.current || new Promise(resolve => loader.load(onLoad(resolve))));
     },
     _completed => {
       unmount && unmount();

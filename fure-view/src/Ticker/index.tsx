@@ -1,5 +1,4 @@
 import React, { ReactElement, ReactNode, createContext, useContext, useDebugValue, useEffect } from 'react';
-import { useUpdate } from '../hooks';
 import { Ticker } from '@fure/core';
 export * from './Subscribe';
 
@@ -13,9 +12,8 @@ export const TickerContext = createContext(Ticker.shared);
 TickerContext.displayName = 'Ticker';
 
 export const TickerController = ({ ticker = Ticker.shared, children = null, running = true }: Props): ReactElement => {
-  useUpdate(() => {
-    if (running !== ticker.running) running ? ticker.start() : ticker.pause();
-  }, [running]);
+  if (running !== ticker.running) running ? ticker.start() : ticker.pause();
+
   useEffect(() => {
     return () => { ticker.pause(); };
   }, []);

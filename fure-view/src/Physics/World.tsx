@@ -1,41 +1,70 @@
-import React, { ReactElement, ReactNode, createContext, useContext } from 'react';
+import React, { ReactElement, ReactNode, createContext, useContext, useDebugValue } from 'react';
 import * as Matter from 'matter-js';
 import { useRenderer } from '../Renderer';
 import { useCloseable } from '../hooks';
 import { useTicker } from '../Ticker';
+import './World.css';
+import { Mouse } from './Mouse';
 
-interface Props {
+interface Props extends Matter.IRendererOptions {
   children?: ReactNode;
   element?: HTMLElement | 'debug'; // `undefined`: no debug render, `HTMLElement`: draw debug render on given element, `true`: append debug render after `view`.
-  options: Matter.IRendererOptions;
 }
 
-export const WorldContext = createContext(undefined as Matter.World | undefined);
-WorldContext.displayName = 'World';
+export const EngineContext = createContext(undefined as Matter.Engine | undefined);
+EngineContext.displayName = 'World.Engine';
 
-export const World = ({ children, element, options }: Props): ReactElement => {
+export const World = ({ children, element, ...options }: Props): ReactElement => {
   const renderer = useRenderer();
   const ticker = useTicker();
-  const world = useCloseable(() => {
+  const engine = useCloseable(() => {
     const engine = Matter.Engine.create();
+    // Matter.Engine.run(engine);
+    ticker.each(delta => Matter.Engine.update(engine, delta));
+    if (element == null) return engine;
+
+    const renderOptions = {
+      width: renderer.width,
+      height: renderer.height,
+      wireframeBackground: 'transparent',
+      showPositions: true,
+      showBounds: true,
+      showVelocity: true,
+      showCollisions: true,
+      ...options,
+    };
     const render = Matter.Render.create({
       engine,
-      element: element === 'debug' ? renderer.view.parentElement as HTMLElement : element || undefined,
-      options: {
-        width: renderer.width,
-        height: renderer.height,
-        ...options,
-      },
+      element: element === 'debug' ? renderer.view.parentElement as HTMLElement : element,
+      options: renderOptions,
     });
-    if (element != undefined) Matter.Render.run(render);
-    ticker.each(delta => Matter.Engine.update(engine, delta));
-    return engine.world;
+    render.canvas.id = 'world';
+    Matter.Render.run(render);
+    engine.render = render;
+
+    return engine;
   });
+
   return (
-    <WorldContext.Provider value={world}>
+    <EngineContext.Provider value={engine}>
       {children}
-    </WorldContext.Provider>
+    </EngineContext.Provider>
   );
 };
 
-export const useWorld = (): Matter.World => useContext(WorldContext) as Matter.World;
+export const useEngine = (): Matter.Engine => {
+  const engine = useContext(EngineContext) as Matter.Engine;
+  useDebugValue(engine, engine => {
+    const g = window as any; // eslint-disable-line @typescript-eslint/no-explicit-any
+    // for debugger
+    g.Matter = Matter;
+    g.engine = engine;
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any, no-debugger
+    if ((useEngine as any).firstDebug !== false) { debugger; (useEngine as any).firstDebug = false; }
+    return `engine#${engine.world.id}`;
+  });
+  return engine;
+};
+export const useWorld = (): Matter.World => (useEngine() || {}).world;
+
+World.Mouse = Mouse;

@@ -29,6 +29,16 @@
       "env": {
         "node": true
       }
+    },
+    {
+      "files": [
+        "examples/**/*/*.{js,jsx}"
+      ],
+      "rules": {
+        "@typescript-eslint/explicit-function-return-type": [
+          "off"
+        ]
+      }
     }
   ],
   "rules": {
@@ -94,7 +104,8 @@
     "@typescript-eslint/indent": [
       "error",
       2
-    ]
+    ],
+    "no-console": "error"
   },
   "settings": {
     "react": {

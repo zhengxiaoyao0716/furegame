@@ -1,6 +1,6 @@
 import React, { ReactElement, ReactNode, createContext, useContext, useMemo } from 'react';
 import * as PIXI from 'pixi.js';
-import { Frozen, useCloseable, useUpdate } from './hooks';
+import { Frozen, useCloseable } from './hooks';
 import { RendererContext } from './Renderer';
 import { LoaderContext } from './Loader';
 import { Stage, StageContext } from './Stage';
@@ -31,12 +31,10 @@ export const App = withView(
       return app as Application;
     });
 
-    useUpdate(() => {
-      if (resizeTo != null && resizeTo !== app.resizeTo) {
-        app.resizeTo = resizeTo;
-        app.resize();
-      }
-    }, [resizeTo]);
+    if (resizeTo != null && resizeTo !== app.resizeTo) {
+      app.resizeTo = resizeTo;
+      app.resize();
+    }
 
     return (
       <AppContext.Provider value={app}>
