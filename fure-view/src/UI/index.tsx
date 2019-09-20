@@ -16,7 +16,7 @@ interface Props {
   scaleMode?: boolean;
 }
 
-const styleOf = (renderer: PIXI.Renderer, scaleMode: boolean = false): CSSProperties => {
+const styleOf = (renderer: PIXI.Renderer, scaleMode = false): CSSProperties => {
   const { clientWidth, clientHeight, offsetLeft, offsetTop } = renderer.view;
   if (!scaleMode) return { width: clientWidth, height: clientHeight, left: offsetLeft, top: offsetTop };
   const { width, height } = renderer;

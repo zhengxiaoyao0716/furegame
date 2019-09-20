@@ -3,25 +3,49 @@ import * as PIXI from 'pixi.js';
 import * as Matter from 'matter-js';
 import './set-poly-decomp'; // `Matter.Bodies.fromVertices` dependence `poly-decomp` to decomposed concave vertices.
 import { useSprite } from '../Sprite';
-import { useWorld } from './World';
 import { useTicker } from '../Ticker';
 import { setRef } from '../UI/View';
+import { useComposite } from './Composite';
 
-interface Props { useBody: () => Matter.Body }
+const eventNames = ['sleepStart', 'sleepEnd'] as const;
+type EventName = typeof eventNames[number];
+type EventCallback = (event: { name: string; source: Matter.Body } & Record<| string | number | symbol, unknown>) => void;
 
-const BodyComponent = ({ useBody }: Props, ref: Ref<Matter.Body>): null => {
+interface Props extends Partial<Pick<Matter.Body, | 'isSleeping' | 'isStatic' | 'isSensor'>> {
+  useBody: () => Matter.Body;
+  events: { [P in EventName]?: EventCallback };
+}
+
+const BodyComponent = ({
+  useBody, events = {},
+  isSleeping, isStatic,
+  isSensor,
+}: Props, ref: Ref<Matter.Body>): null => {
   const body = useBody();
-  const world = useWorld();
+  const composite = useComposite();
   useEffect(() => {
-    Matter.World.add(world, body);
+    Matter.Composite.add(composite, body);
     setRef(ref, body);
-    return () => { Matter.World.remove(world, body); };
+    return () => { Matter.Composite.remove(composite, body); };
   }, []);
+
+  if (isSleeping != null && isSleeping != body.isSleeping) Matter.Sleeping.set(body, isSleeping);
+  if (isStatic != null && isStatic != body.isStatic) Matter.Body.setStatic(body, isStatic);
+  if (isSensor != null && isSensor != body.isSensor) body.isSensor = isSensor;
+
+  eventNames.forEach(name => useEffect(() => {
+    const callback = events[name];
+    if (callback == null) return;
+    Matter.Events.on(body, name, callback);
+    return () => Matter.Events.off(body, name, callback);
+  }, [events[name]]));
+
   return null;
 };
 BodyComponent.displayName = 'Body';
 
-const SpriteBody = (newBody: (sprite: PIXI.Sprite) => Matter.Body): Props => ({
+type UseBodyProps = Pick<Props, 'useBody'>;
+const SpriteBody = (newBody: (sprite: PIXI.Sprite) => Matter.Body): UseBodyProps => ({
   useBody: () => {
     const sprite = useSprite();
     const body = useMemo(() => {
@@ -49,16 +73,16 @@ const SpriteBody = (newBody: (sprite: PIXI.Sprite) => Matter.Body): Props => ({
 export interface BodyDefinition extends Omit<Matter.IBodyDefinition, | 'speed'> {
   /** `speed` would be calculated by `velocity`, so never set it manually. */
 }
-const SpriteCircle = (options?: BodyDefinition): Props => SpriteBody(({ x, y, width }): Matter.Body => Matter.Bodies.circle(x, y, width / 2, options));
-const SpriteRectangle = (options?: BodyDefinition): Props => SpriteBody(({ x, y, width, height }): Matter.Body => Matter.Bodies.rectangle(x, y, width, height, options));
-const SpritePath = (points: (sprite: PIXI.Sprite) => [number, number][], options?: BodyDefinition): Props => {
+const SpriteCircle = (options?: BodyDefinition): UseBodyProps => SpriteBody(({ x, y, width }): Matter.Body => Matter.Bodies.circle(x, y, width / 2, options));
+const SpriteRectangle = (options?: BodyDefinition): UseBodyProps => SpriteBody(({ x, y, width, height }): Matter.Body => Matter.Bodies.rectangle(x, y, width, height, options));
+const SpritePath = (points: (sprite: PIXI.Sprite) => [number, number][], options?: BodyDefinition): UseBodyProps => {
   const newBody = (sprite: PIXI.Sprite): Matter.Body => {
     const vertices = [points(sprite).map(([x, y]) => Matter.Vector.create(x, y))];
     return Matter.Bodies.fromVertices(sprite.x, sprite.y, vertices, options);
   };
   return SpriteBody(newBody);
 };
-const SpriteTriangle = (options?: BodyDefinition): Props => SpritePath(({ width, height }) => [[width / 2, 0], [0, height], [width, height]], options);
+const SpriteTriangle = (options?: BodyDefinition): UseBodyProps => SpritePath(({ width, height }) => [[width / 2, 0], [0, height], [width, height]], options);
 
 export const Body = forwardRef(BodyComponent) as ForwardRefExoticComponent<Props & RefAttributes<Matter.Body>> & {
   Sprite: typeof SpriteBody;

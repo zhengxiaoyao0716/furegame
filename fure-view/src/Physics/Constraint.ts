@@ -1,15 +1,13 @@
 import * as Matter from 'matter-js';
 import { useWorld } from './World';
-import { Frozen, useCloseableAsync } from '../hooks';
-import { MutableRefObject, useMemo } from 'react';
-
-interface PromiseRef<T> extends PromiseLike<T>, MutableRefObject<T | null> { }
+import { Frozen, PromiseRef, useCloseableAsync } from '../hooks';
+import { useMemo } from 'react';
 
 type Props = {
-  [P in keyof Matter.IConstraintDefinition]?: PromiseRef<NonNullable<Matter.IConstraintDefinition[P]>> | Matter.IConstraintDefinition[P];
+  [P in keyof Matter.IConstraintDefinition]?: Frozen<PromiseRef<NonNullable<Matter.IConstraintDefinition[P]>> | Matter.IConstraintDefinition[P]>;
 };
 
-export const Constraint = (props: Frozen<Props>): null => {
+export const Constraint = (props: Props): null => {
   const world = useWorld();
   useCloseableAsync(async closeRef => {
     const options: Matter.IConstraintDefinition = {};

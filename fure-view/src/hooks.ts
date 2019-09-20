@@ -1,11 +1,11 @@
 /** utility hooks. */
 
-import { DependencyList, RefObject, useEffect, useMemo, useRef, useState } from 'react';
+import { DependencyList, MutableRefObject, RefObject, useEffect, useMemo, useRef, useState } from 'react';
 
 type Closeable = | { destroy: () => void } | { remove: () => void } | { close: () => void };
 
 /** `Frozen` property should never be changed after mounted. */
-export type Frozen<T> = T & { [P in keyof T]: T[P] };
+export type Frozen<T> = T & { '　NEVER_UPDATE'?: never };
 
 export const defaultClose = (value: Closeable | {}): void => ('close' in value ? value.close() : 'destroy' in value ? value.destroy() : 'remove' in value ? value.remove() : undefined);
 
@@ -45,3 +45,19 @@ export const useCloseableAsync = <T>(
 //   useMemo(update, []);
 //   useEffect(update, deps);
 // };
+
+export interface PromiseRef<T> extends PromiseLike<T>, MutableRefObject<T | null> { }
+
+export const usePromiseRef = <V>(): PromiseRef<V> => useMemo((): PromiseRef<V> => {
+  let value: V | null = null;
+  let setValue: (value: V | PromiseLike<V>) => void;
+  const promise = new Promise<V>(resolve => setValue = resolve);
+  return {
+    set current(instance) {
+      value = instance;
+      instance == null || setValue(instance);
+    },
+    get current() { return value; },
+    then: promise.then.bind(promise),
+  };
+}, []);
