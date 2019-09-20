@@ -1,6 +1,6 @@
 {
   "name": "@fure/view",
-  "version": "0.0.0",
+  "version": "0.1.0",
   "description": "Functional Reactive Game Framework (main)",
   "keywords": [
     "furegame",
@@ -39,7 +39,7 @@
     "qrcode": "^1.3.3"
   },
   "devDependencies": {
-    "@fure/core": "^0.0.0",
+    "@fure/core": "^0.1.0",
     "@types/react": "^16.8.17",
     "@types/react-dom": "^16.8.4",
     "react": "^16.8.6",
