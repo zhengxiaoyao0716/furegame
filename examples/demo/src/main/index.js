@@ -14,7 +14,7 @@ const args: { dev?: boolean | 'true'; windowed?: boolean | 'true' } = parseArgs(
 const options = args.dev ? {
   page: 'http://localhost:3000',
 } : {
-  buildDir: path.resolve(__dirname, '../../build'),
+  buildDir: path.join(__dirname, '../../build'),
   buildPrefix: 'furegame',
   page: '/furegame',
 };

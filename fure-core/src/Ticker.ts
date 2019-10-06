@@ -117,6 +117,7 @@ export class Ticker {
       if (!this._running) return;
       if (render.skipOnBack) {
         render.skipOnBack = false;
+        // eslint-disable-next-line no-console
         console.info(`timer#${id} skipped a frame about ${delta}ms because the window has hide.`);
         return;
       }

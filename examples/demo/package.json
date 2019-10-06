@@ -8,12 +8,7 @@
   "dependencies": {
     "@fure/core": "^0.1.0",
     "@fure/main": "^0.1.0",
-    "@fure/view": "^0.1.0",
     "carlo": "^0.9.45",
-    "react": "^16.8.6",
-    "react-dom": "^16.8.6",
-    "react-router-dom": "^5.0.0",
-    "react-scripts": "3.1.1",
     "rxjs": "^6.5.2"
   },
   "scripts": {
@@ -25,7 +20,7 @@
     "predeploy": "npm run build",
     "deploy": "gh-pages -d build",
     "prepack": "npm run build",
-    "pack": "nexe -i ./build/main -o ./dist/fure -r \"build/**\" -t win-x86"
+    "pack": "pkg . --output ./dist/demo.exe --targets x86"
   },
   "browserslist": {
     "production": [
@@ -39,12 +34,25 @@
       "last 1 safari version"
     ]
   },
+  "bin": "build/main/index.js",
+  "pkg": {
+    "scripts": "build/**/*.js",
+    "assets": [
+      "build/**/*",
+      "!build/main/**/*.js"
+    ]
+  },
   "devDependencies": {
     "@babel/node": "^7.4.5",
+    "@fure/view": "^0.1.0",
     "@types/carlo": "^0.9.0",
     "@types/react": "^16.8.17",
     "@types/react-dom": "^16.8.4",
     "gh-pages": "^2.0.1",
-    "nexe": "^3.2.1"
+    "pkg": "^4.4.0",
+    "react": "^16.8.6",
+    "react-dom": "^16.8.6",
+    "react-router-dom": "^5.0.0",
+    "react-scripts": "3.1.1"
   }
 }
