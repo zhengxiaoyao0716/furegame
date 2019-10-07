@@ -34,3 +34,24 @@ body {
 #root #helper .button.selected {
   background: #00000066;
 }
+
+#root>#back {
+  position: absolute;
+  bottom: 3vh;
+  right: 0;
+  width: 5em;
+  height: 1.6em;
+  line-height: 1.6em;
+  text-align: center;
+  color: #fff;
+  background: #00000033;
+  cursor: pointer;
+}
+#root>#back::before {
+  content: "";
+  position: absolute;
+  left: -0.8em;
+  border-top: transparent solid 0.8em;
+  border-bottom: transparent solid 0.8em;
+  border-right: #00000033 solid 0.8em;
+}
