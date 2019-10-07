@@ -1,5 +1,5 @@
 import path from 'path';
-import fs from 'fs';
+import fs, { access } from 'fs';
 import util from 'util';
 import carlo from 'carlo';
 import { Subject } from 'rxjs';
@@ -63,11 +63,36 @@ export const pipeLoad = (...args: Parameters<carlo.App['load']>): Pipe => async 
   return app;
 };
 
+export const pipeStdLog = (logPath: string, outs = [process.stdout, process.stderr]): Pipe => async app => {
+  const file = path.resolve(process.cwd(), logPath);
+  console.info(`see "${file}" for the log.`); // eslint-disable-line no-console
+
+  if (!fs.existsSync(file)) fs.mkdirSync(path.dirname(file), { recursive: true });
+  const log = fs.createWriteStream(file, { flags: 'a', encoding: 'UTF-8' });
+  log.write(`//region ${new Date().toISOString()}\n\n`);
+
+  outs.forEach(out => {
+    const write = out.write.bind(out);
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    (out.write as any) = (...args: Parameters<typeof log.write>) => {
+      write(...args);
+      return log.write(...args);
+    };
+  });
+
+  app.on('exit', () => {
+    log.write(`\n//endregion ${new Date().toISOString()}\n\n\n`);
+    log.end();
+  });
+  return app;
+};
+
 interface Options {
   buildDir?: string;
   buildPrefix?: string;
   fullscreen?: boolean;
   page?: string;
+  logPath?: string;
 }
 export const main = async <E extends Events, M>(
   cores: Core<E, M>[],
@@ -76,6 +101,7 @@ export const main = async <E extends Events, M>(
     buildPrefix = '',
     fullscreen = false,
     page = '/',
+    logPath = `./log/${new Date().toISOString().slice(0, 10)}.log`,
   }: Options,
 ): Promise<carlo.App> => {
   const app = await carlo.launch()
@@ -83,6 +109,7 @@ export const main = async <E extends Events, M>(
     .then(pipeEach(cores.map(core => pipeCore(core))))
     .then(pipeBuild(buildDir, buildPrefix))
     .then(pipeFullscreen(fullscreen))
+    .then(pipeStdLog(logPath))
     ;
   app.on('exit', () => process.exit());
   if (page != null) await pipeLoad(page)(app);
