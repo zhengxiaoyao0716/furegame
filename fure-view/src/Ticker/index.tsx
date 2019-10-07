@@ -6,13 +6,15 @@ interface Props {
   ticker?: Ticker;
   children?: ReactNode;
   running?: boolean;
+  autoStart?: boolean;
 }
 
 export const TickerContext = createContext(Ticker.shared);
 TickerContext.displayName = 'Ticker';
 
-export const TickerController = ({ ticker = Ticker.shared, children = null, running = true }: Props): ReactElement => {
+export const TickerController = ({ ticker = Ticker.shared, children = null, running = true, autoStart }: Props): ReactElement => {
   if (running !== ticker.running) running ? ticker.start() : ticker.pause();
+  if (autoStart != null && autoStart != ticker.autoStart) ticker.autoStart = autoStart;
 
   useEffect(() => {
     return () => { ticker.pause(); };

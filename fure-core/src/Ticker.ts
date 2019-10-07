@@ -21,6 +21,8 @@ const requestTimer = (
 );
 
 export class Ticker {
+  public readonly id: string;
+
   //#region timer
 
   private time = { now: 0, offset: 0, run: 0, delta: 0 }
@@ -42,17 +44,17 @@ export class Ticker {
     return 1000 / this.time.delta;
   }
 
-  private autoStart?: () => void;
+  public autoStart: boolean;
 
   public readonly pipe: Subject<number>['pipe'];
   // execute `fn` each tick.
   public each(fn: (delta: number) => void): Subscription {
-    this.autoStart && this.autoStart();
+    this._running || this.autoStart && this.start();
     return this.pipe().subscribe(fn);
   }
   // execute `fn` once at next tick.
   public once(fn: (delta: number) => void): Subscription {
-    this.autoStart && this.autoStart();
+    this._running || this.autoStart && this.start();
     return this.pipe(take(1)).subscribe(fn);
   }
 
@@ -79,8 +81,10 @@ export class Ticker {
    * @param syncPeriod default is `100`, it will sync timer betweenn browser and back-end each `syncPeriod` millisecond.
    */
   public constructor(id: string, autoStart = false, syncPeriod = 100) {
-    //#region init core
+    this.id = id;
+    this.autoStart = autoStart;
 
+    //#region init core
     const core = (() => {
       const subject = new Subject<{
         running?: boolean;
@@ -97,13 +101,6 @@ export class Ticker {
     core.pipe(pick('running')).subscribe(running => this._running = running);
     this.core = core;
     //#endregion
-
-    if (autoStart) {
-      this.autoStart = () => {
-        this.start();
-        this.autoStart = undefined;
-      };
-    }
 
     //#region init timer
 
