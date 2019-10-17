@@ -1,5 +1,5 @@
 import path from 'path';
-import fs, { access } from 'fs';
+import fs from 'fs';
 import util from 'util';
 import carlo from 'carlo';
 import { Subject } from 'rxjs';
@@ -115,3 +115,5 @@ export const main = async <E extends Events, M>(
   if (page != null) await pipeLoad(page)(app);
   return app;
 };
+
+export * from './parseArgs';

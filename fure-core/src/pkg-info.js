@@ -8,6 +8,7 @@ const pkgInfo = [
   '\n',
   `%c${pkg.license}%c`,
   `%c${pkg.homepage}%c`,
+  '\n',
 ].join('');
 
 const padding = 'padding: 0.2em 0.5em;';
@@ -17,6 +18,7 @@ const style = [
   ...[],
   ...[`background: #e00; color: #9ff; ${padding}`, ''],
   ...[`${padding}`, ''],
+  ...[],
 ];
 
 if (typeof window === 'undefined') console.info(pkgInfo.replace(/%c/g, ' * ')); // eslint-disable-line no-console

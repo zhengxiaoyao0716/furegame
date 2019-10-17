@@ -97,8 +97,6 @@ export class Ticker {
       };
       return new Core(`_FURE_CORE_TICKER-${id}`, events, subject);
     })();
-
-    core.pipe(pick('running')).subscribe(running => this._running = running);
     this.core = core;
     //#endregion
 
@@ -106,12 +104,12 @@ export class Ticker {
 
     const timer = new Subject<number>();
     const render = (now: number): void => {
-      requestTimer(render);
-
       const delta = now - this.time.now;
       this.time.now = now;
       this.time.delta = 0;
       if (!this._running) return;
+      requestTimer(render);
+
       if (render.skipOnBack) {
         render.skipOnBack = false;
         // eslint-disable-next-line no-console
@@ -123,8 +121,11 @@ export class Ticker {
       this.time.run += delta;
       timer.next(delta);
     };
+    core.pipe(pick('running')).subscribe(running => {
+      this._running = running;
+      running && requestTimer(render);
+    });
 
-    render(0);
     this.pipe = timer.pipe.bind(timer);
     //#endregion
 

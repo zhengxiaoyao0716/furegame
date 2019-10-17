@@ -23,7 +23,7 @@ export class TreeSet<E> {
   public elements: Readonly<E>[] = [];
   public comparator: Comparator<E>;
 
-  public constructor(comparator: Comparator<E> = compareNature, elements?: Readonly<E>[]) {
+  public constructor(comparator: Comparator<E> = compareNature(), elements?: Readonly<E>[]) {
     this.comparator = comparator;
     elements && this.pushAll(elements);
   }

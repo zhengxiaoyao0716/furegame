@@ -21,7 +21,8 @@
     "predeploy": "npm run build",
     "deploy": "gh-pages -d build",
     "prepack": "npm run build",
-    "pack": "pkg . --output ./dist/demo.exe --targets x86"
+    "pack": "pkg . --output dist/demo.exe --targets x86",
+    "postpack": "fure-main build:launch dist/demo.exe --icon public/favicon.ico"
   },
   "browserslist": {
     "production": [
