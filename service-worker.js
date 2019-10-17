@@ -14,7 +14,7 @@
 importScripts("https://storage.googleapis.com/workbox-cdn/releases/4.3.1/workbox-sw.js");
 
 importScripts(
-  "/furegame/precache-manifest.a467244aad6f3c0e6764ca843a058586.js"
+  "/furegame/precache-manifest.b2a516d65c2c8db2acc0d7ae904a3082.js"
 );
 
 self.addEventListener('message', (event) => {
