@@ -1,13 +1,13 @@
 {
   "name": "@fure/examples-demo",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "Functional Reactive Game Framework (examples/demo)",
   "private": true,
   "homepage": "https://zhengxiaoyao0716.github.io/furegame",
   "license": "MIT",
   "dependencies": {
-    "@fure/core": "^0.1.0",
-    "@fure/main": "^0.1.0",
+    "@fure/core": "^0.1.1",
+    "@fure/main": "^0.1.1",
     "carlo": "^0.9.45",
     "react-router-dom": "5.1",
     "rxjs": "^6.5.2"
@@ -46,7 +46,7 @@
   },
   "devDependencies": {
     "@babel/node": "^7.4.5",
-    "@fure/view": "^0.1.0",
+    "@fure/view": "^0.1.1",
     "@types/carlo": "^0.9.0",
     "@types/react": "^16.8.17",
     "@types/react-dom": "^16.8.4",

@@ -1,6 +1,6 @@
 {
   "name": "@fure/core",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "Functional Reactive Game Framework (core)",
   "keywords": [
     "furegame",
