@@ -1,33 +1,33 @@
 import os from 'os';
-import fs from 'fs';
 import path from 'path';
-import { Command } from './cli';
-import { compareReverse } from '@fure/core';
 import { spawn } from 'child_process';
+import { compareReverse } from '@fure/core';
+import { Command } from './cli';
+import { copyFile, exists, mkdtemp, readdir, rename, rmdir, unlink, writeFile } from './async-fs';
 
-export const findCSCPath = (): string => {
+export const findCSCPath = async (): Promise<string> => {
   const winDir = process.env.windir || 'C:\\Windows';
   const dotNetDirs = [`${winDir}\\Microsoft.NET\\Framework`, `${winDir}\\Microsoft.NET\\Framework64`];
   for (const dotNetDir of dotNetDirs) {
-    if (!fs.existsSync(dotNetDir)) continue;
-    const versions = fs.readdirSync(dotNetDir)
+    if (!await exists(dotNetDir)) continue;
+    const versions = (await readdir(dotNetDir))
       .filter(dir => dir.startsWith('v'))
       .sort(compareReverse());
     for (const version of versions) {
       const cscPath = path.join(dotNetDir, version, 'csc.exe');
-      if (!fs.existsSync(cscPath)) continue;
+      if (!await exists(cscPath)) continue;
       return cscPath;
     }
   }
 
   const msBuildDir = 'C:\\Program Files (x86)\\MSBuild';
-  if (fs.existsSync(msBuildDir)) {
-    const versions = fs.readdirSync(msBuildDir)
+  if (await exists(msBuildDir)) {
+    const versions = (await readdir(msBuildDir))
       .filter(dir => dir.match(/\d+.\d+/))
       .sort(compareReverse());
     for (const version of versions) {
       const cscPath = path.join(msBuildDir, version, 'Bin\\csc.exe');
-      if (!fs.existsSync(cscPath)) continue;
+      if (!await exists(cscPath)) continue;
       return cscPath;
     }
   }
@@ -36,7 +36,7 @@ export const findCSCPath = (): string => {
     const envPathDirs = process.env.Path.split(';');
     for (const pathDir of envPathDirs) {
       const cscPath = path.join(pathDir, 'csc.exe');
-      if (!fs.existsSync(cscPath)) continue;
+      if (!await exists(cscPath)) continue;
       return cscPath;
     }
   }
@@ -80,14 +80,14 @@ const command: Command = async args => {
   const { dir: exeDir, name: exeName, base: exeFile } = path.parse(exePath);
   const binFile = `${exeName}.bin`;
   const binPath = path.join(exeDir, binFile);
-  const existsExe = fs.existsSync(exePath);
-  const existsBin = fs.existsSync(binPath);
+  const existsExe = await exists(exePath);
+  const existsBin = await exists(binPath);
   if (!existsExe && !existsBin) {
     console.error('exe not exsist');
     return;
   }
 
-  const cscPath = args.csc || findCSCPath();
+  const cscPath = args.csc || await findCSCPath();
   if (!cscPath) {
     console.error('failed to find "csc.exe", try to use "-csc CSC_PATH" to define it manually.');
     return;
@@ -97,7 +97,7 @@ const command: Command = async args => {
   const iconPath = args.icon || '';
   if (iconPath) cscArgs.push(`/win32icon:${iconPath}`);
 
-  const tmpDir = fs.mkdtempSync(`${os.tmpdir()}/furegame-build-launch-`);
+  const tmpDir = await mkdtemp(`${os.tmpdir()}/furegame-build-launch-`);
   const srcPath = path.join(tmpDir, `${exeName}.cs`);
   cscArgs.push(srcPath);
 
@@ -105,32 +105,39 @@ const command: Command = async args => {
 
   const exeBkPath = path.join(tmpDir, exeFile);
   const binBkPath = path.join(tmpDir, binFile);
-  existsExe && fs.copyFileSync(exePath, exeBkPath);
-  existsBin && fs.copyFileSync(binPath, binBkPath);
+  existsExe && await copyFile(exePath, exeBkPath);
+  existsBin && await copyFile(binPath, binBkPath);
   if (existsExe) {
-    existsBin && fs.unlinkSync(binPath);
-    fs.renameSync(exePath, binPath);
+    existsBin && await unlink(binPath);
+    await rename(exePath, binPath);
   }
 
-  fs.writeFileSync(srcPath, template(binFile));
+  await writeFile(srcPath, template(binFile));
   const code = await new Promise(resolve => {
     const child = spawn(cscPath, cscArgs, { stdio: 'inherit' });
     child.once('exit', resolve);
   });
 
-  if (code === 0) {
-    [srcPath, exeBkPath, binBkPath].forEach(path => fs.existsSync(path) && fs.unlinkSync(path));
-    fs.rmdirSync(tmpDir);
-  } else {
-    fs.existsSync(exePath) && fs.unlinkSync(exePath);
-    fs.existsSync(binPath) && fs.unlinkSync(binPath);
-    fs.existsSync(exeBkPath) && fs.copyFileSync(exeBkPath, exePath);
-    fs.existsSync(binBkPath) && fs.copyFileSync(binBkPath, binPath);
+  const clean = async (): Promise<void> => {
+    for (const path of [srcPath, exeBkPath, binBkPath]) {
+      await exists(path) && await unlink(path);
+    }
+    await rmdir(tmpDir);
+  };
 
-    [srcPath, exeBkPath, binBkPath].forEach(path => fs.existsSync(path) && fs.unlinkSync(path));
-    fs.rmdirSync(tmpDir);
-    throw new Error('build failed');
+  if (code === 0) {
+    await clean();
+    return;
   }
+
+  // restore the backup
+  await exists(exePath) && await unlink(exePath);
+  await exists(binPath) && await unlink(binPath);
+  await exists(exeBkPath) && await copyFile(exeBkPath, exePath);
+  await exists(binBkPath) && await copyFile(binBkPath, binPath);
+
+  await clean();
+  throw new Error('build failed');
 };
 command.desc = 'BIN_PATH [-icon ICON_PATH] [-csc CSC_PATH] \n\tbuild launch';
 

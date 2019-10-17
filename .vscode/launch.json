@@ -16,6 +16,7 @@
                 "--config-file",
                 "${workspaceFolder}\\.babelrc"
             ],
+            "cwd": "${workspaceFolder}\\examples\\demo",
             "sourceMaps": true
         }
     ]
