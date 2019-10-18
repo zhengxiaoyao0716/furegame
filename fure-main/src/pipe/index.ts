@@ -33,32 +33,41 @@ export const pipeCore = <E extends Events, M>(core: Core<E, M>): Pipe => async a
 };
 
 export const pipeBuild = (buildDir?: string, prefix?: string): Pipe => async app => {
+  // f**k the carlo.
+  const handlers = [] as Array<(request: carlo.HttpRequest) => Promise<boolean>>;
+  const serveHandler = app.serveHandler.bind(app);
+  app.serveHandler = ((handler: (request: carlo.HttpRequest) => Promise<boolean>) => handlers.push(handler)) as unknown as typeof serveHandler;
+  serveHandler(async request => {
+    for (let index = handlers.length - 1; index >= 0; index--) {
+      const handler = handlers[index];
+      const finish = await handler(request);
+      if (finish === true) return;
+      else if (finish === false) continue;
+      throw new Error('the handler of "app.serverHandler" must return "true" or "false".');
+    }
+    request.continue();
+  });
+
   if (!buildDir) return app;
 
   app.serveFolder(buildDir, prefix);
+
   app.serveHandler(async request => {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    if ((request as any).resourceType() !== 'Document') {
-      request.continue();
-      return;
-    }
+    if ((request as any).resourceType() !== 'Document') return false;
     // redirect all pages to `index.html`.
     const headers = { 'content-type': 'text/html' };
     const body = await afs.readFile(path.join(buildDir, 'index.html'));
     request.fulfill({ status: 200, headers, body });
+    return true;
   });
   return app;
 };
 
 export const pipeFullscreen = (fullscreen?: boolean): Pipe => async app => {
   const window = app.mainWindow();
-  await app.exposeFunction('requestFullscreen', window.fullscreen.bind(window));
-  fullscreen && window.fullscreen();
-  return app;
-};
-
-export const pipeLoad = (...args: Parameters<carlo.App['load']>): Pipe => async app => {
-  app.load(...args);
+  Core.main.emitter.on('fullscreen', () => window && window.fullscreen());
+  fullscreen && Core.main.events.fullscreen();
   return app;
 };
 
@@ -83,6 +92,11 @@ export const pipeStdLog = (logPath: string, outs = [process.stdout, process.stde
     log.write(`\n//endregion ${new Date().toISOString()}\n\n\n`);
     log.end();
   });
+  return app;
+};
+
+export const pipeExit = (): Pipe => async app => {
+  app.on('exit', () => process.exit());
   return app;
 };
 

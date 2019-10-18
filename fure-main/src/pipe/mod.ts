@@ -12,11 +12,13 @@ const findMod = async (modPath: string): Promise<string> => {
 };
 
 export const pipeMod = (modPath: string): Pipe => async app => {
+  if (!modPath) return app;
   const modFile = await findMod(modPath);
   if (!modFile) return app;
   console.info(`load mod from "${modFile}"`); // eslint-disable-line no-console
   try {
-    require(modFile);
+    const mod = require(modFile).default;
+    mod && mod instanceof Function && mod(app, require);
   } catch (error) {
     console.error(error); // eslint-disable-line no-console
     return app;

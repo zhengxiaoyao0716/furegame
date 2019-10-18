@@ -7,9 +7,9 @@ interface Options {
   buildDir?: string;
   buildPrefix?: string;
   fullscreen?: boolean;
-  page?: string;
   log?: string;
   mod?: string;
+  page?: string;
 }
 export const main = async <E extends Events, M>(
   cores: Core<E, M>[],
@@ -18,20 +18,21 @@ export const main = async <E extends Events, M>(
     buildPrefix = '',
     fullscreen = false,
     log = `./log/${new Date().toISOString().slice(0, 10)}.log`,
-    page = '/',
     mod = 'mod',
+    page = '/',
   }: Options,
 ): Promise<carlo.App> => {
   const app = await carlo.launch()
+    .then(Pipes.pipeCore(Core.main))          // pipe shared core
     .then(Pipes.pipeCore(Ticker.shared.core)) // pipe shared ticker
     .then(Pipes.pipeEach(cores.map(core => Pipes.pipeCore(core))))
     .then(Pipes.pipeBuild(buildDir, buildPrefix))
     .then(Pipes.pipeFullscreen(fullscreen))
     .then(Pipes.pipeStdLog(log))
+    .then(Pipes.pipeMod(mod))
+    .then(Pipes.pipeExit())
     ;
-  app.on('exit', () => process.exit());
-  if (page != null) await Pipes.pipeLoad(page)(app);
-  mod && await Pipes.pipeMod(mod)(app);
+  page != null && await app.load(page);
   return app;
 };
 

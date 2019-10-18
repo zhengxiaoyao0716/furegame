@@ -1,6 +1,7 @@
 node_modules/
 build/
 dist/
+!examples/demo/dist/.mod.js
 /fure-*/lib/
 
 *.log*

@@ -52,6 +52,12 @@ export class Core<E extends Events, M> {
     }), {}) as AsyncEvents<E>;
     //#endregion
   }
+
+  public static readonly main: typeof import('./main').default = (() => {
+    const main = require('./main').default;
+    if (typeof window !== 'undefined') return main;
+    return require('./main/main').default as typeof main;
+  })();
 }
 
 export type CoreEvents<C> = C extends Core<infer E, infer _M> ? AsyncEvents<E> : never;
