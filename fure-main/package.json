@@ -1,6 +1,6 @@
 {
   "name": "@fure/main",
-  "version": "0.1.1",
+  "version": "0.1.2",
   "description": "Functional Reactive Game Framework (main)",
   "keywords": [
     "furegame",
@@ -35,7 +35,7 @@
     "url": "https://github.com/zhengxiaoyao0716/furegame/issues"
   },
   "devDependencies": {
-    "@fure/core": "^0.1.1",
+    "@fure/core": "^0.1.2",
     "@types/carlo": "^0.9.0",
     "carlo": "^0.9.45",
     "rxjs": "^6.5.2"
