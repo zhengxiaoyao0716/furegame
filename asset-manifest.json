@@ -1,15 +1,15 @@
 {
   "files": {
-    "main.css": "/furegame/static/css/main.75debb17.chunk.css",
-    "main.js": "/furegame/static/js/main.860581a8.chunk.js",
-    "main.js.map": "/furegame/static/js/main.860581a8.chunk.js.map",
+    "main.css": "/furegame/static/css/main.5ae92016.chunk.css",
+    "main.js": "/furegame/static/js/main.45fef4fd.chunk.js",
+    "main.js.map": "/furegame/static/js/main.45fef4fd.chunk.js.map",
     "runtime~main.js": "/furegame/static/js/runtime~main.0db9b5da.js",
     "runtime~main.js.map": "/furegame/static/js/runtime~main.0db9b5da.js.map",
-    "static/js/2.a4ba427d.chunk.js": "/furegame/static/js/2.a4ba427d.chunk.js",
-    "static/js/2.a4ba427d.chunk.js.map": "/furegame/static/js/2.a4ba427d.chunk.js.map",
+    "static/js/2.772c580a.chunk.js": "/furegame/static/js/2.772c580a.chunk.js",
+    "static/js/2.772c580a.chunk.js.map": "/furegame/static/js/2.772c580a.chunk.js.map",
     "index.html": "/furegame/index.html",
-    "precache-manifest.b2a516d65c2c8db2acc0d7ae904a3082.js": "/furegame/precache-manifest.b2a516d65c2c8db2acc0d7ae904a3082.js",
+    "precache-manifest.dbaeba1ad902bcd7eacac5117de3c1fe.js": "/furegame/precache-manifest.dbaeba1ad902bcd7eacac5117de3c1fe.js",
     "service-worker.js": "/furegame/service-worker.js",
-    "static/css/main.75debb17.chunk.css.map": "/furegame/static/css/main.75debb17.chunk.css.map"
+    "static/css/main.5ae92016.chunk.css.map": "/furegame/static/css/main.5ae92016.chunk.css.map"
   }
 }
