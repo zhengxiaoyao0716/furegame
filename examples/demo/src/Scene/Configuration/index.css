@@ -1,0 +1,20 @@
+.Configuration {
+  position: absolute;
+  width: 100vw;
+  height: 100vh;
+}
+
+.Configuration>div {
+  position: absolute;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  width: 50vw;
+  height: 100vh;
+}
+@media all and (orientation: portrait) {
+  .Configuration>div {
+    width: 100vw;
+    height: 50vh;
+  }
+}

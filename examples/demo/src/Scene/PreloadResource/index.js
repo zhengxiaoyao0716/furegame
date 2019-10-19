@@ -123,6 +123,4 @@ const PreloadResource = () => {
     </App>
   );
 };
-PreloadResource.displayName = 'PreloadResource';
-PreloadResource.displayText = 'Preload Resource';
 export default PreloadResource;

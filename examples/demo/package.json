@@ -9,7 +9,6 @@
     "@fure/core": "^0.1.2",
     "@fure/main": "^0.1.2",
     "carlo": "^0.9.45",
-    "react-router-dom": "5.1",
     "rxjs": "^6.5.2"
   },
   "scripts": {

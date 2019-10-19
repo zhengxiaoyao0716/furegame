@@ -1,4 +1,4 @@
-import React, { ReactNode, useMemo } from 'react';
+import React, { ReactNode } from 'react';
 import { debounceTime, map } from 'rxjs/operators';
 import { App, Loader, Renderer, Stage, TickerController, UI, fromResize, useSubscribe } from '@fure/view';
 import './index.css';
@@ -22,7 +22,7 @@ const usages = {
     );
   },
   Advance({ children }: { children: ReactNode }) {
-    const size = useSubscribe(useMemo(() => fromResize(document.body).pipe(debounceTime(100), map(bodySize)), []), bodySize());
+    const size = useSubscribe(() => fromResize(document.body).pipe(debounceTime(100), map(bodySize)), bodySize());
     return (
       <Loader> {/* `Loader` is optional */}
         <div style={{ position: 'absolute', width: '100%', height: '100%', textAlign: 'center' }}>
@@ -57,6 +57,4 @@ const StageAndUI = () => {
     </Usage>
   );
 };
-StageAndUI.displayName = 'StageAndUI';
-StageAndUI.displayText = 'Stage & UI';
 export default StageAndUI;

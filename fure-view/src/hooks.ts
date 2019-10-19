@@ -28,7 +28,7 @@ export const useCloseableAsync = <T>(
   const [state, setState] = useState(undefined as T | undefined);
   useEffect(() => {
     const promise = Promise.resolve(supplier(closeRef));
-    closeRef.current || promise.then(setState);
+    closeRef.current || promise.then(stateNew => setState(_stateOld => stateNew));
     return () => {
       closeRef.current = true;
       promise.then(close);
@@ -36,15 +36,6 @@ export const useCloseableAsync = <T>(
   }, deps);
   return state;
 };
-
-// deprected.
-// export const useUpdate: typeof useEffect = (
-//   update: EffectCallback,
-//   deps: DependencyList = []
-// ): void => {
-//   useMemo(update, []);
-//   useEffect(update, deps);
-// };
 
 export interface PromiseRef<T> extends PromiseLike<T>, MutableRefObject<T | null> { }
 

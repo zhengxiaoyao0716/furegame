@@ -75,6 +75,4 @@ const HighFrequency = () => {
     </App>
   );
 };
-HighFrequency.displayName = 'HighFrequency';
-HighFrequency.displayText = 'High Frequency';
 export default HighFrequency;

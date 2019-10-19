@@ -4,24 +4,27 @@ import { Link, match } from 'react-router-dom';
 import { History, Location } from 'history'; // only used as type.
 import './index.css';
 import '@fure/view';
-import { scenes } from '../Scene';
+import { SceneId, scenes } from '../Scene';
 import { PUBLIC_URL } from '..';
 
-interface LocationState { } // eslint-disable-line @typescript-eslint/no-empty-interface
+export interface LocationState { } // eslint-disable-line @typescript-eslint/no-empty-interface
+export interface LocationParams {
+  scene: SceneId;
+}
 
 interface Props {
   history: History<LocationState>;
   location: Location<LocationState>;
-  match: match;
+  match: match<LocationParams>;
 }
 
 // eslint-disable-next-line no-unused-vars
 const Home = ({ history: _history, location, match: _match }: Props) => {
   return (
     <div className="Home">
-      {scenes.map(Scene => (
-        <Link key={Scene.displayName} to={{ ...location, pathname: `${PUBLIC_URL}/scene/${Scene.displayName}` }}>
-          <p>{Scene.displayText}</p>
+      {Object.entries(scenes).map(([sceneId, { displayText = sceneId }]) => (
+        <Link key={sceneId} to={{ ...location, pathname: `${PUBLIC_URL}/scene/${sceneId}` }}>
+          <p>{displayText}</p>
         </Link>
       ))}
     </div>

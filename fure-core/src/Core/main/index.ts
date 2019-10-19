@@ -1,5 +1,5 @@
 import { Subject } from 'rxjs';
-import { Core, Events } from '../Core';
+import { Core, Events } from '../core';
 
 type EventEmitter = import('events').EventEmitter; // only used as type for `main` module.
 
@@ -15,8 +15,8 @@ export class MainCore<E extends Events, M> extends Core<E, M> {
 const main = new MainCore(
   /* stub! */undefined as unknown as EventEmitter,
   {
-    emit(...args: Parameters<EventEmitter['emit']>) { /* stub! */ }, // eslint-disable-line @typescript-eslint/no-unused-vars
-    fullscreen() { /* stub! */ },
+    async emit(...args: Parameters<EventEmitter['emit']>) { /* stub! */ return false; }, // eslint-disable-line @typescript-eslint/no-unused-vars
+    async fullscreen() { /* stub! */ return false; },
   },
   new Subject()
 );

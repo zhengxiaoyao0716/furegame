@@ -96,6 +96,4 @@ const Physics = () => {
     </App>
   );
 };
-Physics.displayName = 'Physics';
-Physics.displayText = 'Physics';
 export default Physics;

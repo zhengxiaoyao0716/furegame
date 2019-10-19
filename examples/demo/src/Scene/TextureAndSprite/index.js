@@ -70,6 +70,4 @@ const TextureAndSprite = () => {
     </Renderer>
   );
 };
-TextureAndSprite.displayName = 'TextureAndSprite';
-TextureAndSprite.displayText = 'Texture & Sprite';
 export default TextureAndSprite;

@@ -1,9 +1,9 @@
 import path from 'path';
 import { Options, main, parseArgs } from '@fure/main';
-import LogicDecoupling from './core/LogicDecoupling';
+import { LogicDecoupling } from './core/main';
 
 const buildDir = path.join(__dirname, '../../build');
-const manifest = require(`${buildDir}/manifest.json`); // eslint-disable-line @typescript-eslint/no-var-requires
+const manifest = require('../../build/manifest.json'); // eslint-disable-line @typescript-eslint/no-var-requires
 
 const args = parseArgs(process.argv.slice(2), { dev: undefined, fullscreen: undefined, log: '.log/', mod: '.mod.js' }); // eslint-disable-line no-undef
 

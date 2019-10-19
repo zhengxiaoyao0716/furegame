@@ -1,6 +1,10 @@
-import { Core } from '@fure/core';
+import { Config, Core } from '@fure/core';
 import { Subject, Subscription, from, interval, timer } from 'rxjs';
 import { tap, zip } from 'rxjs/operators';
+
+export const Configuration: Config<{
+  background: number;
+}> = new Config(`${process.env.PUBLIC_URL}/config/Configuration.json`);
 
 export const LogicDecoupling = (() => {
   type Attr = | 'fire' | 'water';

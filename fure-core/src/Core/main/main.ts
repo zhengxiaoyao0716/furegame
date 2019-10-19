@@ -9,8 +9,8 @@ const emitter = new EventEmitter();
 export default new MainCore(
   emitter,
   {
-    emit(...args: Parameters<EventEmitter['emit']>) { emitter.emit(...args); },
-    fullscreen(...args) { this.emit('fullscreen', ...args); },
+    async emit(...args: Parameters<EventEmitter['emit']>) { return emitter.emit(...args); },
+    async fullscreen(...args) { return emitter.emit('fullscreen', ...args); },
   },
   new Subject()
 );

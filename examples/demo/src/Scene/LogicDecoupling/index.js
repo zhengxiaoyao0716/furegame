@@ -30,7 +30,7 @@ const Player = ({ attr }: PlayerProps) => {
 };
 
 const Message = ({ value = [], show }: { value: [string, number][]; show: number }) => {
-  const now = useSubscribe(useMemo(() => interval(1000 / 30).pipe(map(() => new Date().getTime())), []), 0);
+  const now = useSubscribe(() => interval(1000 / 30).pipe(map(() => new Date().getTime())), 0);
   const messages = value.map(([message, insertAt]): [string, number] => [message, now - insertAt]).filter(([, time]) => (time < show));
   return (
     <div className="Message">{messages.map(([message, time], index) => (
@@ -42,9 +42,9 @@ Message.queue = scan((queue: [[string, number]], message: string): [[string, num
 
 interface GameProps { player: PlayerProps & { name: string } }
 const Game = ({ player }: GameProps) => {
-  const life = useSubscribe(useMemo(() => core.pipe(pick('life')), []), 0);
-  const attr = useSubscribe(useMemo(() => core.pipe(pick('attr')), []));
-  const messages = useSubscribe(useMemo(() => core.pipe(pick('message')).pipe(Message.queue), []));
+  const life = useSubscribe(() => core.pipe(pick('life')), 0);
+  const attr = useSubscribe(() => core.pipe(pick('attr')));
+  const messages = useSubscribe(() => core.pipe(pick('message')).pipe(Message.queue));
 
   useEffect(() => {
     core.events.join(player.name, player.attr);
@@ -69,6 +69,4 @@ export const LogicDecoupling = () => {
     </div>
   );
 };
-LogicDecoupling.displayName = 'LogicDecoupling';
-LogicDecoupling.displayText = 'Logic Decoupling';
 export default LogicDecoupling;
