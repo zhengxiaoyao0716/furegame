@@ -20,8 +20,11 @@ export const findCSCPath = async (): Promise<string> => {
     }
   }
 
-  const msBuildDir = 'C:\\Program Files (x86)\\MSBuild';
-  if (await exists(msBuildDir)) {
+  const prg32Dir = process.env['PROGRAMFILES(X86)'] || 'C:\\Program Files (x86)';
+  const prg64Dir = process.env['PROGRAMFILES'] || 'C:\\Program Files ';
+  const msBuildDirs = [`${prg32Dir}\\MSBuild`, `${prg64Dir}\\MSBuild`];
+  for (const msBuildDir of msBuildDirs) {
+    if (!await exists(msBuildDir)) continue; // never
     const versions = (await readdir(msBuildDir))
       .filter(dir => dir.match(/\d+.\d+/))
       .sort(compareReverse());

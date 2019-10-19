@@ -1,21 +1,26 @@
 import path from 'path';
-import { main, parseArgs } from '@fure/main';
+import { Options, main, parseArgs } from '@fure/main';
 import LogicDecoupling from './core/LogicDecoupling';
+
+const buildDir = path.join(__dirname, '../../build');
+const manifest = require(`${buildDir}/manifest.json`); // eslint-disable-line @typescript-eslint/no-var-requires
 
 const args = parseArgs(process.argv.slice(2), { dev: undefined, fullscreen: undefined, log: '.log/', mod: '.mod.js' }); // eslint-disable-line no-undef
 
-const options = {
+const options: Options = {
   ...args.dev ? {
     page: 'http://localhost:3000',
   } : ({
-    buildDir: path.join(__dirname, '../../build'),
+    buildDir,
     buildPrefix: 'furegame',
-    page: '/furegame',
+    page: manifest['start_url'],
   }),
   ...{
     fullscreen: !!args.fullscreen,
     log: path.join(args.log, `${new Date().toISOString().slice(0, 10)}.log`),
     mod: args.mod,
+    icon: path.join(buildDir, 'favicon.ico'),
+    title: manifest.name,
   },
 };
 args.dev && console.log('launch with develop mode:', options); // eslint-disable-line no-console

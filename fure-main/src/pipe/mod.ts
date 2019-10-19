@@ -3,9 +3,10 @@ import { Pipe } from '.';
 import { exists } from '../async-fs';
 
 const findMod = async (modPath: string): Promise<string> => {
+  if (path.isAbsolute(modPath)) return modPath; // require absolute path must exists
   const modDirs = [process.cwd(), path.dirname(process.execPath)];
   for (const modDir of modDirs) {
-    const modFile = path.resolve(modDir, modPath);
+    const modFile = path.join(modDir, modPath);
     if (await exists(modFile)) return modFile;
   }
   return '';
