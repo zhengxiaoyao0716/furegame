@@ -27,7 +27,6 @@ const Editor = () => {
 };
 
 const Configuration = () => {
-  config.events.load();
   return (
     <div className="Configuration">
       <App><Preview /></App>
