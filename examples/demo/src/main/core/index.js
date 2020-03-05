@@ -4,7 +4,7 @@ import { tap, zip } from 'rxjs/operators';
 
 export const Configuration: Config<{
   background: number;
-}> = new Config(`${process.env.PUBLIC_URL}/config/Configuration.json`);
+}> = new Config('config/Configuration.json', `${typeof window !== 'undefined' ? process.env.PUBLIC_URL : `${__dirname}/../../../public`}/`);
 
 export const LogicDecoupling = (() => {
   type Attr = | 'fire' | 'water';
@@ -85,5 +85,9 @@ export const LogicDecoupling = (() => {
       subscriptions.clear();
     },
   };
-  return new Core('LogicDecoupling', events, subject);
+  const core = new Core('LogicDecoupling', subject);
+  core.join = events.join;
+  core.blow = events.blow;
+  core.leave = events.leave;
+  return core;
 })();

@@ -1,11 +1,7 @@
 import path from 'path';
 import { BehaviorSubject } from 'rxjs';
-import { Core, Events } from './core';
-
-export interface ConfigEvents<C> extends Events {
-  load(): Promise<C>;
-  save(config: C): Promise<void>;
-}
+import { Core } from './Core';
+import { filter } from 'rxjs/operators';
 
 export interface ConfigParser<C> {
   parse(text: string): C;
@@ -21,9 +17,9 @@ export const JsonParser: ConfigParser<any> = { parse: text => JSON.parse(text), 
 // 场景编辑器、剧本编辑器等等都应该是配置编辑器的一个子集实现。
 // 还有，底层存储最好不用json，换成yaml之类比较好，按行存储感觉更加方便版本管理
 
-const newCoreParams = (typeof window === 'undefined'
+const newRpcMethods = (typeof window === 'undefined'
   // BACKEND
-  ? <C>(url: string, parser: ConfigParser<C>) => {
+  ? <C>(next: BehaviorSubject<C>['next'], url: string, parser: ConfigParser<C>) => {
     const afs = async () => { // eslint-disable-line @typescript-eslint/explicit-function-return-type
       const fs = await import('fs');
       const util = await import('util');
@@ -33,40 +29,38 @@ const newCoreParams = (typeof window === 'undefined'
       };
     };
 
-    const subject = new BehaviorSubject<C>(undefined as unknown as C);
-    const events: ConfigEvents<C> = {
+    return {
       async load() {
         const { readFile } = await afs();
         const text = String(await readFile(url));
         const config = parser.parse(text);
-        subject.next(config);
+        console.log('config', config);
+        next(config);
         return config;
       },
-      async save(config) {
+      async save(config: C) {
         const text = parser.dumps(config);
         // rewrite file
         const { writeFile } = await afs();
         await writeFile(url, text, { flag: 'w' });
       },
     };
-    events.load();
-    return [events, subject] as const;
   }
 
   // FRONTEND
-  : <C>(url: string, parser: ConfigParser<C>) => {
+  : <C>(next: BehaviorSubject<C>['next'], url: string, parser: ConfigParser<C>) => {
     const g = window; // eslint-disable-line no-undef
     const filename = path.basename(url);
 
-    const subject = new BehaviorSubject<C>(undefined as unknown as C);
-    const events: ConfigEvents<C> = {
+    return {
       async load() {
         const text = await g.fetch(url).then(resp => resp.text());
         const config = parser.parse(text);
-        subject.next(config);
+        console.log('config', config);
+        next(config);
         return config;
       },
-      async save(config) {
+      async save(config: C) {
         const text = parser.dumps(config);
         // download file
         const file = new g.Blob([text], { type: 'text/plain' });
@@ -76,13 +70,19 @@ const newCoreParams = (typeof window === 'undefined'
         save.click();
       },
     };
-    events.load();
-    return [events, subject] as const;
   }
 );
 
-export class Config<C> extends Core<ConfigEvents<C>, C> {
-  public constructor(url: string, parser: ConfigParser<C> = JsonParser) {
-    super(url, ...newCoreParams<C>(url, parser));
+export class Config<C> extends Core<C> {
+  public readonly pipe: BehaviorSubject<C>['pipe'];
+  public constructor(filename: string, publicDir: string, parser: ConfigParser<C> = JsonParser) {
+    super(filename, new BehaviorSubject<C>(undefined as unknown as C));
+    this.pipe = super.pipe.bind(this, filter(data => data !== undefined)) as BehaviorSubject<C>['pipe'];
+
+    const methods = newRpcMethods<C>(this.next, path.resolve(publicDir, filename), parser);
+    this.load = methods.load;
+    this.save = methods.save;
   }
+  public readonly load: () => Promise<C>;
+  public readonly save: (config: C) => Promise<void>;
 }

@@ -1,7 +1,7 @@
 import { Subject, Subscription, asyncScheduler, fromEvent } from 'rxjs';
 import { filter, take, throttleTime } from 'rxjs/operators';
 import { Core } from './Core';
-import { pick } from './rx';
+import { pick } from '../rx';
 
 const requestTimer = (
   typeof window === 'undefined'
@@ -63,12 +63,11 @@ export class Ticker {
   //#endregion
 
   //#region controller
-
-  public readonly core: Core<{ start: () => void; pause: () => void }, {}>;
+  public readonly core: Core<unknown>;
   // start ticker
-  public start(): Promise<void> { return this.core.events.start(); }
+  public readonly start: () => Promise<void>;
   // pause ticker
-  public pause(): Promise<void> { return this.core.events.pause(); }
+  public readonly pause: () => Promise<void>;
   //#endregion
 
   public static shared = new Ticker('shared', true);
@@ -85,19 +84,14 @@ export class Ticker {
     this.autoStart = autoStart;
 
     //#region init core
-    const core = (() => {
-      const subject = new Subject<{
-        running?: boolean;
-        time?: { offset: number };
-      }>();
-      const events = {
-        start: () => subject.next({ running: true }),
-        pause: () => subject.next({ running: false }),
-        sync: (offset: number) => subject.next({ time: { offset } }),
-      };
-      return new Core(`_FURE_CORE_TICKER-${id}`, events, subject);
-    })();
+    const core = new Core(`_FURE_CORE_TICKER-${id}`, new Subject<{
+      running?: boolean;
+      time?: { offset: number };
+    }>());
     this.core = core;
+    this.start = core.rpc(async () => core.next({ running: true }));
+    this.pause = core.rpc(async () => core.next({ running: false }));
+    const sync = core.rpc(async (offset: number) => core.next({ time: { offset } }));
     //#endregion
 
     //#region init timer
@@ -125,7 +119,6 @@ export class Ticker {
       this._running = running;
       running && requestTimer(render);
     });
-
     this.pipe = timer.pipe.bind(timer);
     //#endregion
 
@@ -135,7 +128,7 @@ export class Ticker {
     if (typeof window === 'undefined') {
       syncPeriod > 0 && timer
         .pipe(throttleTime(syncPeriod, asyncScheduler, { leading: true, trailing: false }))
-        .subscribe(_delta => core.events.sync(new Date().getTime() - this.time.now));
+        .subscribe(_delta => sync(new Date().getTime() - this.time.now));
     } else {
       core.pipe(pick('time')).subscribe(({ offset }) => this.time.offset = new Date().getTime() - this.time.now - offset);
       // eslint-disable-next-line @typescript-eslint/no-explicit-any

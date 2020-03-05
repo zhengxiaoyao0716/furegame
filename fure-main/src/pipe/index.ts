@@ -1,8 +1,7 @@
 import fs from 'fs';
 import path from 'path';
 import carlo from 'carlo';
-import { Subject } from 'rxjs';
-import { Core, Events } from '@fure/core';
+import { Core } from '@fure/core';
 import * as afs from './../async-fs';
 
 export interface Pipe {
@@ -14,19 +13,17 @@ export const pipeEach = (pipes: Pipe[]): Pipe => async app => {
   return app;
 };
 
-export const pipeCore = <E extends Events, M>(core: Core<E, M>): Pipe => async app => {
-  await app.exposeFunction(core.rpcId, core.rpc);
+export const pipeCore = <M>(newCore: (app: carlo.App) => Core<M>): Pipe => async app => {
+  const core = newCore(app);
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const subject = (core as any)[core.subjectId] as Subject<M>;
-  const subcription = subject.subscribe(data => {
+  await app.exposeFunction(core.rpcId, (core as any)[core.rpcId]);
+  const subcription = core.pipe().subscribe(data => {
     const win = app.mainWindow();
-    win && win.evaluate((data, subjectId) => {
-      //#region THE BROWSER WINDOW CONTEXT
+    win && win.evaluate((data, msgId) => {
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       const g = window as any; // eslint-disable-line no-undef
-      return g[subjectId].next(data);
-      //#endregion
-    }, data as any, core.subjectId); // eslint-disable-line @typescript-eslint/no-explicit-any
+      return g[msgId](data);
+    }, data as any, core.msgId); // eslint-disable-line @typescript-eslint/no-explicit-any
   });
   app.on('exit', () => subcription.unsubscribe());
   return app;
@@ -67,7 +64,7 @@ export const pipeBuild = (buildDir?: string, prefix?: string): Pipe => async app
 export const pipeFullscreen = (fullscreen?: boolean): Pipe => async app => {
   const window = app.mainWindow();
   Core.main.emitter.on('fullscreen', () => window && window.fullscreen());
-  fullscreen && Core.main.events.fullscreen();
+  fullscreen && Core.main.fullscreen();
   return app;
 };
 

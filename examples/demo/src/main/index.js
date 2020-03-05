@@ -1,6 +1,6 @@
 import path from 'path';
 import { Options, main, parseArgs } from '@fure/main';
-import { LogicDecoupling } from './core/main';
+import cores from './core/main';
 
 const buildDir = path.join(__dirname, '../../build');
 const manifest = require('../../build/manifest.json'); // eslint-disable-line @typescript-eslint/no-var-requires
@@ -24,4 +24,4 @@ const options: Options = {
   },
 };
 args.dev && console.log('launch with develop mode:', options); // eslint-disable-line no-console
-main([LogicDecoupling], options);
+main(cores, options);

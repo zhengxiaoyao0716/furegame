@@ -1,8 +1,10 @@
 import path from 'path';
 import carlo from 'carlo';
-import { Core, Events, Ticker } from '@fure/core';
+import { Core, Ticker } from '@fure/core';
 import * as Pipes from './pipe';
 import * as afs from './async-fs';
+
+export type App = carlo.App;
 
 export const optimizeUserDataDir = (options: carlo.LaunchOptions): carlo.LaunchOptions => {
   if (!(process as any).pkg) return options; // eslint-disable-line @typescript-eslint/no-explicit-any
@@ -20,8 +22,8 @@ export interface Options extends carlo.LaunchOptions {
   mod?: string;
   page?: string;
 }
-export const main = async <E extends Events, M>(
-  cores: Core<E, M>[],
+export const main = async (
+  cores: Array<<M>(app: carlo.App) => Core<M>>,
   {
     buildDir = '',
     buildPrefix = '',
@@ -33,8 +35,8 @@ export const main = async <E extends Events, M>(
   }: Options,
 ): Promise<carlo.App> => {
   const app = await carlo.launch(optimizeUserDataDir(launchOptions))
-    .then(Pipes.pipeCore(Core.main))          // pipe shared core
-    .then(Pipes.pipeCore(Ticker.shared.core)) // pipe shared ticker
+    .then(Pipes.pipeCore(() => Core.main))          // pipe shared core
+    .then(Pipes.pipeCore(() => Ticker.shared.core)) // pipe shared ticker
     .then(Pipes.pipeEach(cores.map(core => Pipes.pipeCore(core))))
     .then(Pipes.pipeBuild(buildDir, buildPrefix))
     .then(Pipes.pipeFullscreen(fullscreen))

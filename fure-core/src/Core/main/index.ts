@@ -1,28 +1,23 @@
 import { Subject } from 'rxjs';
-import { Core, Events } from '../core';
+import { Core } from '../Core';
 
 type EventEmitter = import('events').EventEmitter; // only used as type for `main` module.
 
-export class MainCore<E extends Events, M> extends Core<E, M> {
+class MainCore<M> extends Core<M> {
   public readonly emitter: EventEmitter;
 
-  public constructor(emitter: EventEmitter, events: E, subject: Subject<M>) {
-    super('main', events, subject);
-    this.emitter = emitter;
+  public constructor() {
+    super('main', new Subject());
+    this.emitter = /* Stub! */undefined as unknown as EventEmitter;
   }
+
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  public readonly emit = this.rpc((...args: Parameters<EventEmitter['emit']>) => /*Stub!*/Promise.resolve(false));
+  public readonly fullscreen = this.rpc(() => Promise.resolve(false));
 }
 
-const main = new MainCore(
-  /* stub! */undefined as unknown as EventEmitter,
-  {
-    async emit(...args: Parameters<EventEmitter['emit']>) { /* stub! */ return false; }, // eslint-disable-line @typescript-eslint/no-unused-vars
-    async fullscreen() { /* stub! */ return false; },
-  },
-  new Subject()
-);
+const main = new MainCore();
 export default main;
 
-if (typeof window !== 'undefined') {
-  // eslint-disable-next-line no-undef
-  window.addEventListener('load', (...args) => main.events.emit('load', ...args));
-}
+// eslint-disable-next-line no-undef
+typeof window === 'undefined' || window.addEventListener('load', (...args) => main.emit('load', ...args));
