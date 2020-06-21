@@ -12,4 +12,12 @@ export class Component<EM extends EventMap> extends EventTarget<EM> {
     super();
     this.name = name;
   }
+
+  get [Symbol.toStringTag](): string {
+    const prototype = Object.getPrototypeOf(this);
+    return prototype.constructor.name;
+  }
+  toString(): string {
+    return `${this[Symbol.toStringTag]}(${this.name})`;
+  }
 }

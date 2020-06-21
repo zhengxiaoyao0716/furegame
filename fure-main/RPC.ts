@@ -20,8 +20,4 @@ export class RPC extends Component<{}> {
     const socket = await ws.connectWebSocket(wsUrl);
     return new RPC(name, wsUrl, socket);
   }
-
-  toString(): string {
-    return `RPC(${this.name})`;
-  }
 }

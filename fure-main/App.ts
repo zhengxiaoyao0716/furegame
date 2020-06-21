@@ -94,13 +94,6 @@ export class App extends Component<AppEventMap> {
     return this.process.pid;
   }
 
-  toString(): string {
-    return `App(${this.name})`;
-  }
-  [Deno.customInspect](): string {
-    return `${this} { pid: ${this.pid} }`;
-  }
-
   private async logOutput(out: Deno.Reader, method: keyof log.LoggerLike) {
     const iter = io.readStringDelim(out, "\n");
     for await (const str of iter) {
@@ -113,12 +106,11 @@ export class App extends Component<AppEventMap> {
 }
 
 export class ExitEvent<T> extends Event {
-  readonly code: number;
-  readonly detail: T;
-  constructor(code: number, detail: T) {
+  constructor(
+    readonly code: number,
+    readonly detail: T,
+  ) {
     super("exit");
-    this.code = code;
-    this.detail = detail;
   }
 }
 

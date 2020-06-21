@@ -27,9 +27,9 @@ export interface EventTarget<EM extends EventMap>
     options?: boolean | EventListenerOptions,
   ): void;
 }
-
-export const EventTarget: {
-  prototype: EventTarget<EventMap>;
+export interface EventTargetConstructor {
+  readonly prototype: EventTarget<EventMap>;
   new <EM extends EventMap>(): EventTarget<EM>;
-  // deno-lint-ignore no-explicit-any
-} = (window as any).EventTarget;
+}
+// deno-lint-ignore no-explicit-any
+export const EventTarget: EventTargetConstructor = (window as any).EventTarget;

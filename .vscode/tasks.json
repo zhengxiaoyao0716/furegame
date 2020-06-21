@@ -22,6 +22,22 @@
             "options": {
                 "cwd": "${workspaceFolder}",
             }
+        },
+        {
+            "label": "test",
+            "type": "shell",
+            "command": "deno",
+            "args": [
+                "test",
+                "-A",
+                "--unstable",
+                "--importmap",
+                "import_map.json"
+            ],
+            "group": "test",
+            "options": {
+                "cwd": "${workspaceFolder}",
+            }
         }
     ]
 }
