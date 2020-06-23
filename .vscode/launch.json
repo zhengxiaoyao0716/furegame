@@ -17,7 +17,7 @@
         "--unstable",
         "--importmap",
         "import_map.json",
-        "game/demo/main.ts" // "${file}"
+        "${file}"
       ],
       "outputCapture": "std",
       "port": 9229,

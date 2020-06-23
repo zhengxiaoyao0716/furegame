@@ -1,5 +1,5 @@
 import { Component } from "../fure-core/mod.ts";
-import { ws } from "./package.ts";
+import { ws } from "./deps.ts";
 
 export class RPC extends Component<{}> {
   readonly wsUrl: string;

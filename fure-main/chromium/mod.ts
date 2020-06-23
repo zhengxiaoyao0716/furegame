@@ -1,7 +1,7 @@
 export * from "./find.ts";
 export * from "./launch.ts";
 
-import { io, log } from "../package.ts";
+import { io, log } from "../deps.ts";
 
 const reg = /^DevTools listening on (ws:\/\/\S+:\d{2,5}\/devtools\/\S+)\s*$/;
 export async function takeWsUrl(

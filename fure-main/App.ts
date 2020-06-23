@@ -1,6 +1,6 @@
 import { Component } from "../fure-core/mod.ts";
 import { EventMap } from "../fure-core/_util/mod.ts";
-import { log, io } from "./package.ts";
+import { log, io } from "./deps.ts";
 import { LauncOptions, buildLaunchCmd, takeWsUrl } from "./chromium/mod.ts";
 import { RPC } from "./RPC.ts";
 

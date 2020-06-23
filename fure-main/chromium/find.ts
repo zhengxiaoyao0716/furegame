@@ -1,4 +1,4 @@
-import { fs, path } from "../package.ts";
+import { fs, path } from "../deps.ts";
 
 export async function findBin(): Promise<string> {
   const os = "win"; // TODO where is `os` lib in Deno???
