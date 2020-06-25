@@ -1,7 +1,14 @@
 import { Component } from "../fure-core/mod.ts";
 import { EventMap as CoreEventMap } from "../fure-core/_util/mod.ts";
-import { useMemo } from "./hooks.ts";
-import { dict, genId } from "./diff.ts";
+import {
+  useMemo,
+  HookContext,
+  useState,
+  useCallback,
+  USeStateContext,
+  symHookIndex,
+} from "./hooks.ts";
+import { dict, genEleId } from "./diff.ts";
 
 export interface Props {
   key?: string;
@@ -10,6 +17,9 @@ export interface Props {
 
 export interface Context {
   // TODO binded hooks
+  useMemo: typeof useMemo;
+  useState: typeof useState;
+  useCallback: typeof useCallback;
 }
 
 export interface Renderer<P extends Props> {
@@ -33,39 +43,50 @@ export class Element<P extends Props> extends Component<EventMap> {
     super(renderer.name);
   }
 
-  private readonly hooks = { run: [] as [] };
   #inner = [] as (Element<Props> | undefined)[];
   #lock: number | "mount" | "unmount" = "unmount";
+  #mounted = false;
 
-  async render<E extends Element<P>>(this: E): Promise<E> {
-    await useMemo(
-      this.hooks.run,
-      async () => {
-        const lock = this.#lock;
-        const unmount = this.update();
-        for await (const e of unmount) {
-          e.#lock = "unmount";
-          e.dispatchEvent(new LifeEvent(e.#lock, e.props));
-        }
-        this.#lock = "mount";
-        lock == "unmount" &&
-          this.dispatchEvent(new LifeEvent(this.#lock, this.props));
-      },
+  async render() {
+    return await useMemo.call(
+      this.renderHooks,
+      this.rerender.bind(this),
       this.props,
-    );
+    ) as this;
+  }
+
+  async rerender() {
+    const lock = this.#lock;
+    const unmount = this.update();
+    for await (const e of unmount) {
+      if (!e.#mounted) continue;
+      e.#lock = "unmount";
+      e.#mounted = false;
+      e.dispatchEvent(new LifeEvent(e.#lock, e.props));
+    }
+    if (this.#lock !== 0) return this; // interrupt
+    this.#lock = "mount";
+    if (!this.#mounted) {
+      this.#mounted = true;
+      this.dispatchEvent(new LifeEvent(this.#lock, this.props));
+    }
     return this;
   }
 
-  async *update(): AsyncIterable<Element<Props>> {
-    const lock = Number.isInteger(this.#lock) ? 1 + (this.#lock as number) : 0;
+  private async *update(): AsyncIterable<Element<Props>> {
+    const lock = Number.isInteger(this.#lock) ? 1 + (this.#lock as number) : 1;
     this.#lock = lock;
 
-    const rendered = this.renderer.call(this, this.props, {} as any);
+    this.renderHooks[symHookIndex] = 0;
+    this.stateHooks[symHookIndex] = 0;
+    Object.values(this.hooks).forEach((ctx) => ctx[symHookIndex] = 0);
+
+    const rendered = this.renderer.call(this, this.props, this.context);
     const resolved = await Promise.resolve(rendered);
     if (this.#lock != lock) return; // cancel
 
     const elements = Array.isArray(resolved) ? resolved : [resolved];
-    const innerNew = elements.map((e, i) => [genId(i, e), e] as const);
+    const innerNew = elements.map((e, i) => [genEleId(e, i), e] as const);
     const innerOld = dict(this.#inner);
     // diff elements
     for (const index in innerNew) {
@@ -83,9 +104,27 @@ export class Element<P extends Props> extends Component<EventMap> {
     }
 
     // rerender
+    const inner = await Promise.all(innerNew.map(([_, e]) => e && e.render()));
+    if (this.#lock != lock) return; // cancel
     this.#lock = 0;
-    this.#inner = await Promise.all(innerNew.map(([_, e]) => e && e.render()));
+    this.#inner = inner;
   }
+
+  private readonly renderHooks = [] as HookContext;
+  private readonly stateHooks = (() => {
+    const hooks = [] as unknown as USeStateContext;
+    hooks.rerender = this.rerender.bind(this);
+    return hooks as USeStateContext;
+  })();
+  private readonly hooks = {
+    memo: [] as HookContext,
+    callback: [] as HookContext,
+  };
+  context = {
+    useState: useState.bind(this.stateHooks),
+    useMemo: useMemo.bind(this.hooks.memo),
+    useCallback: useCallback.bind(this.hooks.callback),
+  } as Context;
 
   [Deno.customInspect](space: string = "  "): string {
     const keyVals = Object.entries(this.props)

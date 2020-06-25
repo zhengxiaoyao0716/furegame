@@ -5,15 +5,20 @@ export function dict(
 ): { [id: string]: Element<Props> | undefined } {
   return elements.reduce((dict, element, index) => ({
     ...dict,
-    [genId(index, element)]: element,
+    [genEleId(element, index)]: element,
   }), {});
 }
 
-export function genId(
-  index: number,
+export function genEleId(
   element: Element<Props> | undefined,
+  index: number,
 ): string {
   if (element == null) return String(index);
   // TODO
-  return String(index);
+  return `${element.name}+${genDepsId(element.props)}`;
+}
+
+export function genDepsId(deps: unknown): string {
+  // TODO
+  return JSON.stringify(deps);
 }
