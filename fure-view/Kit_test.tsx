@@ -1,36 +1,26 @@
 /** @jsx Kit.c */
-import { Kit, Props, Fragment } from "./Kit.ts";
+import { Kit, Props, create } from "./Kit.ts";
 
 function Child(props: { name: string }) {
   return;
 }
-function App(props: Props) {
+function App({ nodes: [child] }: { nodes: Kit<{ name: string }>[] }) {
 }
 
-// WTF?
 const app = (
   // WTF
   <App>
-    <Fragment>
-      <Child name="a" />
-    </Fragment>
+    {(<Child name="a" /> as unknown as Kit<{ name: string }>)}
+    {(<Child name="b" /> as Kit<any>)}
   </App>
+) as Kit<{}>;
+
+const child = Kit.c(Child, { name: "a" });
+
+const _app = create(App, { nodes: [child] });
+
+const fragment = (
+  <>
+    {null}
+  </>
 );
-
-const _app = Kit.c(App, {});
-
-const frag = (
-  <Fragment>
-    <Child name="b" />
-  </Fragment>
-);
-
-// WTF
-const _fragment = Kit.c(Fragment, {}, Kit.c(Child, { name: "a" }));
-
-interface ChildProps extends Props {
-  name: string;
-}
-const child = Kit.c(Child, { name: "a" } as ChildProps);
-// WTF
-const _fragment1 = Kit.c(Fragment, {}, child);
