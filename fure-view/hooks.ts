@@ -47,30 +47,3 @@ export function useCallback<R extends Function>(
 ): R {
   return useMemo.call(this, () => cb, deps) as R;
 }
-
-interface SetState<T> {
-  (state: T | Promise<T> | ((old: T) => T | Promise<T>)): void;
-}
-
-export interface USeStateContext extends HookContext {
-  rerender: Function;
-}
-export function useState<T>(
-  this: USeStateContext | void,
-  init: T,
-): [T, SetState<T>] {
-  const store: HookStore<T> = getHookStore(this);
-  if (!store.deps) {
-    store.deps = "Initialized";
-    store.result = init;
-  }
-  const setState: SetState<T> = async (state) => {
-    const result = await Promise.resolve(
-      state instanceof Function ? state(store.result as T) : state,
-    );
-    if (result == store.result) return;
-    store.result = result;
-    await Promise.resolve((this as USeStateContext).rerender());
-  };
-  return [store.result as T, setState];
-}
