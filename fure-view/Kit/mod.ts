@@ -1,5 +1,8 @@
-import { Component } from "../fure-core/mod.ts";
-import { EventMap as EMap, OptPromise } from "../fure-core/_util/mod.ts";
+import { Component } from "../../fure-core/mod.ts";
+import { EventMap as EMap, OptPromise } from "../../fure-core/_util/mod.ts";
+import type { Devtools } from "./Devtools.ts";
+import type { Reactive, State } from "./Reactive.ts";
+import type { WebDom } from "./WebDom.ts";
 
 export interface Props {
   nodes?: Readonly<any[]>;
@@ -65,52 +68,50 @@ export class Kit<P extends {}> extends Component<EventMap> {
   }
 
   // nodes
-  private [symbol$nodes] = new Set();
-  mount(node: Kit<any>) {
+  private [symbol$nodes] = new Set<Kit<any>>();
+  *nodes(): IterableIterator<Kit<any>> {
+    for (const node of this[symbol$nodes]) {
+      yield node; // export lazy list
+    }
+  }
+  mount(node: Kit<any>): /*autorun*/ boolean {
     if (node.parent == this) return false;
     node.unmount();
     node[symbol$parent] = this;
     this[symbol$nodes].add(node);
-    return true;
+    return node.dispatchEvent(new LifeEvent("mount", true));
   }
   unmount() {
-    if (this.parent == null) return false;
+    if (this.parent == null) return;
+    this.dispatchEvent(new LifeEvent("unmount"));
     this.parent[symbol$nodes].delete(this);
     this[symbol$parent] = null;
-    return true;
   }
   //#endregion
 
-  //#region inspect
-
-  [Deno.customInspect](space: string = "  "): string {
-    const keyVals = Object.entries(this.props)
-      .filter(([key]) => key != "nodes")
-      .map(([key, val]) =>
-        `${key}=${typeof val == "string" ? `"${val}"` : `{${val}}`}`
-      ).join(" ");
-    const props = keyVals && ` ${keyVals}`;
-
-    const nodes = Array.from(this[symbol$nodes]) as Kit<any>[];
-    if (nodes.length == 0) return `<${this.name}${props}/>`;
-
-    const inner = nodes.map((e) =>
-      e?.[Deno.customInspect]()?.replace(/\n/g, `\n${space}`)
-    ).join(`\n${space}`);
-    return `<${this.name}${props}>\n${space}${inner}\n</${this.name}>`;
-  }
+  //#region extension
+  static openDevtools = () => import("./Devtools.ts");
+  static openReactive = () => import("./Reactive.ts");
+  static openWebDom = () => import("./WebDom.ts");
   //#endregion
 }
+
+export interface Kit<P extends {}> extends Devtools, Reactive, WebDom {}
+export { State };
 
 //
 
 //#region events
 
 export interface EventMap extends EMap {
+  unmount: LifeEvent;
 }
-export class LifeEvent<P extends Props> extends Event {
-  constructor(type: string) {
-    super(type, { bubbles: true });
+export class LifeEvent extends Event {
+  constructor(type: string, cancelable?: boolean) {
+    super(type, { cancelable });
   }
+}
+export interface LifeEvent {
+  readonly target: Kit<any>;
 }
 //#endregion

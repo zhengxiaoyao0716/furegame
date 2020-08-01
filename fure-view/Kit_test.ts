@@ -1,6 +1,6 @@
 /** @jsx Kit.create */
 import { delay } from "std/async/delay.ts";
-import { Kit, Props, Setup, LifeEvent } from "./Kit.ts";
+import { Kit, Props, Setup } from "./Kit/mod.ts";
 
 const Child: Setup<{ value?: number; nodes?: Kit<any>[] }> = function (
   { nodes },
@@ -27,9 +27,10 @@ async function App() {
 }
 
 const app = Kit.create(App);
-Deno.test("Element", () => app.run());
+Deno.test("Kit", () => app.run());
 if (import.meta.main) {
   await app.run();
   await delay(100);
+  await Kit.openDevtools();
   console.log(app);
 }
