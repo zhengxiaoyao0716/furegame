@@ -1,9 +1,9 @@
-import { Setup, State, Kit, Props } from "./mod.ts";
+import { Setup, State, Kit, KitAny } from "./mod.ts";
 
 interface CounterProps {
   id: string;
   $count: State<number>;
-  nodes: [Kit<any>]; // disallow nodes
+  nodes: [KitAny]; // disallow nodes
 }
 const Counter: Setup<CounterProps> = async function (
   { id, $count, nodes: [footer] },
@@ -35,10 +35,11 @@ const Footer: Setup<FooterProps> = function ({ reset }) {
 
 const App: Setup<{}> = async function () {
   const $count = this.state(0);
+  const [_listen, update] = $count;
   const counter = Kit.create(
     Counter,
     { id: "counter", $count },
-    Kit.create(Footer, { reset: () => $count[1](() => 0) }),
+    Kit.create(Footer, { reset: () => update(() => 0) }),
   );
   await this.html`<div>${counter}</div>`;
 };

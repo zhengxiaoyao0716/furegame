@@ -1,7 +1,7 @@
 // would conflict with built-in libs, f**k /// <reference lib="dom"/>
 
 import { hashCode } from "../../fure-core/_util/mod.ts";
-import { Kit } from "./mod.ts";
+import { Kit, KitAny } from "./mod.ts";
 
 const symbol$subId = Symbol("subId");
 
@@ -16,7 +16,7 @@ export interface WebDom {
 
 //#region dom
 
-async function resolveSub(this: Kit<any>, sub: any): Promise<string> {
+async function resolveSub(this: KitAny, sub: unknown): Promise<string> {
   if (sub instanceof Kit) {
     const autorun = this.mount(sub);
     const id = ++this[symbol$subId];
@@ -30,12 +30,12 @@ async function resolveSub(this: Kit<any>, sub: any): Promise<string> {
     return subs.join("");
   }
   // TODO resolve special subs like onevent callback?
-  return sub;
+  return String(sub);
 }
 
 class Dom {
   constructor(
-    readonly kit: Kit<any>,
+    readonly kit: KitAny,
     readonly hash: string,
     readonly html: string,
   ) {
@@ -64,12 +64,12 @@ Kit.prototype.html = async function (temp, ...subs) {
 
 //#region render
 
-async function renderToString(this: Kit<any>) {
+async function renderToString(this: KitAny) {
   return this.dom?.html ?? ""; // TODO insert id into root element for select?
 }
 
 async function renderToElement(
-  this: Kit<any>,
+  this: KitAny,
   root: Element | keyof HTMLElementTagNameMap | keyof SVGElementTagNameMap,
 ) {
   if (!(root instanceof Element)) {
@@ -90,6 +90,7 @@ interface SVGElementTagNameMap {
   "a": Element;
   "circle": Element;
 }
+// deno-lint-ignore no-namespace
 declare namespace document {
   function querySelector<K extends keyof HTMLElementTagNameMap>(
     selectors: K,

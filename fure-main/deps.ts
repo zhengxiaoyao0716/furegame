@@ -1,4 +1,3 @@
-// deno-lint-ignore-file
 export * as fs from "std/fs/mod.ts";
 export * as io from "std/io/mod.ts";
 export * as path from "std/path/mod.ts";

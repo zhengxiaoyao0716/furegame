@@ -5,7 +5,7 @@ import type { Reactive, State } from "./Reactive.ts";
 import type { WebDom } from "./WebDom.ts";
 
 export interface Props {
-  nodes?: Readonly<any[]>;
+  nodes?: Readonly<unknown[]>;
 }
 
 export interface Setup<P extends Props> {
@@ -13,7 +13,7 @@ export interface Setup<P extends Props> {
   (
     this: Kit<P>,
     props: Readonly<P>,
-  ): OptPromise<void | null | undefined | Kit<any> | Kit<any>[]>;
+  ): OptPromise<void | null | undefined | KitAny | KitAny[]>;
 }
 
 /*private*/ const symbol$parent = Symbol("parent");
@@ -38,7 +38,7 @@ export class Kit<P extends {}> extends Component<EventMap> {
     const node = await Promise.resolve(this.setup(this.props));
     const nodes = Array.isArray(node) ? node : [node];
     const tasks = nodes
-      .filter((node): node is Kit<any> => node instanceof Kit)
+      .filter((node): node is KitAny => node instanceof Kit)
       .filter((node) => this.mount(node))
       .map((node) => node.run());
     await Promise.all(tasks);
@@ -50,7 +50,7 @@ export class Kit<P extends {}> extends Component<EventMap> {
   static create<P extends {}>(
     setup: Setup<P>,
     props = {} as Omit<P, "nodes"> & Props,
-    ...nodes: P extends { nodes: infer Nodes } ? Nodes : any[]
+    ...nodes: P extends { nodes: infer Nodes } ? Nodes : never[]
   ): Kit<P> {
     if (props.nodes == null) props.nodes = nodes;
     else if (nodes.length > 0) throw new Error("duplicate props `nodes`");
@@ -58,23 +58,23 @@ export class Kit<P extends {}> extends Component<EventMap> {
   }
 
   // tree
-  private [symbol$parent]: Kit<any> | null = null;
-  get parent(): Kit<any> | null {
+  private [symbol$parent]: KitAny | null = null;
+  get parent(): KitAny | null {
     return this[symbol$parent];
   }
-  get origin(): Kit<any> {
+  get origin(): KitAny {
     if (this.parent == null) return this;
     return this.parent.origin;
   }
 
   // nodes
-  private [symbol$nodes] = new Set<Kit<any>>();
-  *nodes(): IterableIterator<Kit<any>> {
+  private [symbol$nodes] = new Set<KitAny>();
+  *nodes(): IterableIterator<KitAny> {
     for (const node of this[symbol$nodes]) {
       yield node; // export lazy list
     }
   }
-  mount(node: Kit<any>): /*autorun*/ boolean {
+  mount(node: KitAny): /*autorun*/ boolean {
     if (node.parent == this) return false;
     node.unmount();
     node[symbol$parent] = this;
@@ -96,8 +96,11 @@ export class Kit<P extends {}> extends Component<EventMap> {
   //#endregion
 }
 
+// deno-lint-ignore no-empty-interface
 export interface Kit<P extends {}> extends Devtools, Reactive, WebDom {}
 export { State };
+// deno-lint-ignore no-explicit-any
+export type KitAny = Kit<any>; // f**k
 
 //
 
@@ -112,6 +115,6 @@ export class LifeEvent extends Event {
   }
 }
 export interface LifeEvent {
-  readonly target: Kit<any>;
+  readonly target: KitAny;
 }
 //#endregion

@@ -1,17 +1,17 @@
-import { Kit } from "./mod.ts";
+import { Kit, KitAny } from "./mod.ts";
 
 export interface Devtools {
   [Deno.customInspect](): string;
 }
 
-function printPropVal(val: any): string {
+function printPropVal(val: unknown): string {
   if (typeof val == "string") return `"${val}"`;
   if (Array.isArray(val)) return `[${val.toString()}]`;
-  return `{${val.toString()}}`;
+  return `{${String(val)}}`;
 }
 
 function customInspect(
-  this: Kit<any>,
+  this: KitAny,
   space: string = "  ",
 ): string {
   const keyVals = Object.entries(this.props)

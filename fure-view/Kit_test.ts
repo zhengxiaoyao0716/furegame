@@ -1,14 +1,14 @@
 /** @jsx Kit.create */
 import { delay } from "std/async/delay.ts";
-import { Kit, Props, Setup } from "./Kit/mod.ts";
+import { Kit, Props, Setup, KitAny } from "./Kit/mod.ts";
 
-const Child: Setup<{ value?: number; nodes?: Kit<any>[] }> = function (
+const Child: Setup<{ value?: number; nodes: KitAny[] }> = function (
   { nodes },
 ) {
   return nodes;
 };
 
-function Parent({ title, nodes }: Props & { title: string }) {
+function Parent({ title: _ }: { title: string }) {
   return [
     Kit.create(
       Child,
