@@ -1,12 +1,13 @@
 import { Kit } from "./mod.ts";
 import { OptPromise } from "../../fure-core/_util/mod.ts";
 
-export interface State<T> {
-  // listen
-  0: <L extends (value: T) => void>(peeker: L) => (/*cancel*/ () => L);
-  // update
-  1: (mapper: (value: T) => OptPromise<T>) => Promise<void>;
+interface Listen<T> {
+  <L extends (value: T) => void>(peeker: L): (/*cancel*/ () => L);
 }
+interface Update<T> {
+  (mapper: (value: T) => OptPromise<T>): Promise<void>;
+}
+export type State<T> = readonly [Listen<T>, Update<T>];
 
 const symbol$stateId = Symbol("stateId");
 export interface Reactive {
@@ -15,11 +16,13 @@ export interface Reactive {
 }
 
 Kit.prototype[symbol$stateId] = 0;
-Kit.prototype.state = function <T>(init: T): State<T> {
-  const id = Kit.prototype[symbol$stateId]++;
-  const name = `_FURE_VIEW_STATE(${this.name})#${id}`;
+Kit.prototype.state = function <T>(init?: T): State<T> {
+  const id = ++this[symbol$stateId];
+  const name = `_FURE_VIEW_STATE(${this.name})#${id.toString(16)}`;
 
-  let state = init;
+  let state: T;
+  if (init !== undefined) state = init;
+
   const listen: State<T>[0] = (peeker) => {
     const listener = () => peeker(state);
     this.addEventListener(name, listener);
@@ -28,9 +31,13 @@ Kit.prototype.state = function <T>(init: T): State<T> {
       return peeker;
     };
   };
+  listen.toString = () => `(listen)`;
+
   const update: State<T>[1] = async (mapper) => {
     state = await Promise.resolve(mapper(state));
     this.dispatchEvent(new Event(name));
   };
-  return [listen, update];
+  update.toString = () => `(update)`;
+
+  return [listen, update] as const;
 };

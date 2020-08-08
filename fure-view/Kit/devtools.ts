@@ -4,16 +4,21 @@ export interface Devtools {
   [Deno.customInspect](): string;
 }
 
+function printPropVal(val: any): string {
+  if (typeof val == "string") return `"${val}"`;
+  if (Array.isArray(val)) return `[${val.toString()}]`;
+  return `{${val.toString()}}`;
+}
+
 function customInspect(
   this: Kit<any>,
   space: string = "  ",
 ): string {
   const keyVals = Object.entries(this.props)
     .filter(([key]) => key != "nodes")
-    .map(([key, val]) =>
-      `${key}=${typeof val == "string" ? `"${val}"` : `{${val}}`}`
-    ).join(" ");
-  const props = keyVals && ` ${keyVals}`;
+    .map(([key, val]) => `${key}=${printPropVal(val)}`).join(" ");
+  let props = keyVals && ` ${keyVals}`;
+  if (this.dom != undefined) props += ` dom="${this.dom.name}"`;
 
   const nodes = Array.from(this.nodes());
   if (nodes.length == 0) return `<${this.name}${props}/>`;

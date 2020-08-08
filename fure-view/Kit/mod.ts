@@ -49,12 +49,12 @@ export class Kit<P extends {}> extends Component<EventMap> {
   // create
   static create<P extends {}>(
     setup: Setup<P>,
-    props = {} as P & Props,
-    ...nodes: any[]
+    props = {} as Omit<P, "nodes"> & Props,
+    ...nodes: P extends { nodes: infer Nodes } ? Nodes : any[]
   ): Kit<P> {
     if (props.nodes == null) props.nodes = nodes;
     else if (nodes.length > 0) throw new Error("duplicate props `nodes`");
-    return new Kit(setup, props);
+    return new Kit(setup, props as P);
   }
 
   // tree
