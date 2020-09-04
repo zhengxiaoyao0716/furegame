@@ -1,0 +1,4 @@
+[submodule "furegame"]
+	path = furegame
+	url = git@github.com:zhengxiaoyao0716/furegame.git
+	branch = gh-pages
