@@ -1,12 +1,25 @@
 package fure.hxx;
 
+using StringTools;
+
 abstract Hxx(String) from String {
 	public inline function new(src:String)
 		this = src;
 
 	@:to
 	public function trans():Ast {
-		var stack = [];
+		var state = State.Space;
+		var ast = [];
+		var strIdx = 0;
+		var stkIdx = 0;
+
+		while (strIdx < this.length) {
+			var char = this.fastCodeAt(strIdx++);
+			// switch (state) {
+			// 	case Space:
+			// }
+		}
+
 		// TODO .
 		return Node(0, "Test", Code(2, '"$this"'), [
 			Node(10, "AbsTest", Code(12, "2"), []),
@@ -16,12 +29,12 @@ abstract Hxx(String) from String {
 }
 
 enum abstract State(Int) {
-	var None;
-	var Node;
+	var Space;
+	var Begin;
 	var TagName;
 	var PropName;
 	var PropValue;
-	var Code;
-	var Body;
+	var Block;
+	var Inner;
 	var Close;
 }

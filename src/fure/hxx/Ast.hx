@@ -41,7 +41,7 @@ class AstTools {
 
 	#if macro
 	public static function parse(ast:Ast, pos:Position):Expr {
-		// return Context.parseInlineString(ast.dumps(), pos);
+		#if debug
 		return switch (ast) {
 			case Node(offset, tag, props, inner):
 				var exprs = [
@@ -85,6 +85,9 @@ class AstTools {
 				macro new fure.hxx.Ast.Nodes($innerVal);
 			case Code(offset, src): Context.parseInlineString(src, pos + offset);
 		}
+		#else
+		return Context.parseInlineString(ast.dumps(), pos);
+		#end
 	}
 	#end
 }
