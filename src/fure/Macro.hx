@@ -13,8 +13,8 @@ class Macro {
 	@:noUsing
 	public static macro function hxx(expr:Expr):Expr
 		return switch (expr) {
-			case macro @:markup $v{(src : String)} : new Hxx(src).trans().parse(expr.pos);
-			case macro $v{(src : String)} : new Hxx(src).trans().parse(expr.pos);
+			case macro @:markup $v{(src : String)} : new Hxx(src).ast().parse(expr.pos);
+			case macro $v{(src : String)} : new Hxx(src).ast().parse(expr.pos);
 			case _: Context.error("Hxx markup string expected instead of " + expr.toString(), expr.pos);
 		};
 

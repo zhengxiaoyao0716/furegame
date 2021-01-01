@@ -31,7 +31,6 @@ private typedef Builder = Array<Int>; // [index, size, rise]
  * depth  : [       +1-0   +1-2            +2-1     +1-0   +0-1  +0-1      ]
  */
 @:allow(fure.collection.RArrIterator)
-@:using(fure.collection.RArr.RArrIterator)
 class RArr<V> {
 	final data:Array<V> = [];
 	final mark:Map<Int, Mark> = [];
