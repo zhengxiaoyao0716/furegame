@@ -1,6 +1,5 @@
 package fure.hxx;
 
-import haxe.io.Encoding;
 import haxe.Exception;
 import fure.collection.RArr;
 
@@ -14,18 +13,16 @@ abstract Hxx(String) from String {
 	public function ast():Ast {
 		var builder = new RArr<AstBuilder>();
 		takeNode(0, builder);
-		trace(builder);
+		var builder = builder.iterator();
 
-		// TODO .
-		return Node(0, "Test", () -> Code(2, '"test"'), () -> [
-			Node(10, "AbsTest", () -> Code(12, "2"), () -> []),
-			Flat(20, () -> [
-				Node(30, "Test", () -> Code(32, "3"), null),
-				Node(40, "Test", () -> Code(42, "4"), null),
-				Flat(50, null),
-			]),
-		]);
+		return switch (builder.length) {
+			case 0: Code(0, 'null');
+			case 1: buildAst(builder.next());
+			case _: Flat(0, () -> [for (ast in builder) buildAst(ast)]);
+		}
 	}
+
+	//#region translate
 
 	function takeNode(offset:Int, builder:RArr<AstBuilder>):Int {
 		var state = State.Begin;
@@ -37,6 +34,11 @@ abstract Hxx(String) from String {
 			switch (state) {
 				case Begin:
 					if (this.fastCodeAt(offset) != '<'.code) {
+						var endAt = takeComment(offset);
+						if (endAt > offset) {
+							offset = skipSpace(endAt);
+							continue;
+						}
 						var endAt = takeBlock(offset);
 						if (endAt <= offset)
 							throw new HxxAstException('Expected `<`', this, offset);
@@ -100,27 +102,28 @@ abstract Hxx(String) from String {
 							state = Inner;
 							offset = skipSpace(offset + 1);
 
-						case '{'.code:
-							if (props == null)
-								throw new HxxAstException('Expected `>`', this, offset);
-							var endAt = takeBlock(offset);
-							var block = this.substring(offset, endAt);
-
-							props = null;
-							builder.push(Code(offset, block));
-							// state = Props;
-							offset = skipSpace(endAt);
-
 						default:
 							if (props == null)
 								throw new HxxAstException('Expected `>`', this, offset);
+							var endAt = takeBlock(offset);
+							if (endAt > offset) {
+								var block = this.substring(offset, endAt);
+	
+								props = null;
+								builder.push(Code(offset, block));
+								// state = Props;
+								offset = skipSpace(endAt);
+								continue;
+							}
 							var endAt = takeIdent(offset);
 							var name = this.substring(offset, endAt);
 							offset = skipSpace(endAt);
 							if (this.fastCodeAt(endAt) != '='.code)
-								throw new HxxAstException('Expected `=', this, offset);
+								throw new HxxAstException('Expected `=`', this, offset);
 							offset = skipSpace(offset + 1);
 							var endAt = takeBlock(offset);
+							if (endAt <= offset)
+								throw new HxxAstException('Expected block', this, offset);
 							var value = this.substring(offset, endAt);
 							props.push('$name: $value');
 							offset = skipSpace(endAt);
@@ -190,6 +193,8 @@ abstract Hxx(String) from String {
 	}
 
 	function takeComment(offset:Int):Int {
+		if (this.charCodeAt(offset) != '/'.code)
+			return offset;
 		offset++;
 		if (offset >= this.length)
 			return offset;
@@ -204,6 +209,8 @@ abstract Hxx(String) from String {
 				if (this.fastCodeAt(offset) == '*'.code && this.fastCodeAt(offset + 1) == '/'.code)
 					return offset + 2;
 			}
+		} else {
+			return offset - 1;
 		}
 		return offset;
 	}
@@ -212,11 +219,12 @@ abstract Hxx(String) from String {
 		var closer = [];
 		var quote:Null<Int> = null;
 		while (offset < this.length) {
-			var charCode = this.fastCodeAt(offset);
-			if (charCode == '/'.code && quote == null) {
-				offset = takeComment(offset);
+			var endAt = takeComment(offset);
+			if (endAt > offset) {
+				offset = endAt;
 				continue;
 			}
+			var charCode = this.fastCodeAt(offset);
 			if (charCode == '\\'.code) {
 				offset++;
 				continue;
@@ -234,7 +242,8 @@ abstract Hxx(String) from String {
 					case '"'.code:
 						quote = charCode;
 					default:
-						// if (closer.length <= 0) throw
+						if (closer.length <= 0)
+							return offset;
 						if (charCode == closer[closer.length - 1])
 							closer.pop();
 				}
@@ -246,6 +255,38 @@ abstract Hxx(String) from String {
 				return offset;
 		}
 		return offset;
+	}
+	//#endregion
+
+	static function buildAst(nodes:Or<AstBuilder, RArrIterable<AstBuilder>>):Ast {
+		return switch (nodes) {
+			case A(one):
+				switch (one) {
+					case Code(offset, src): Code(offset, src);
+					case _: null; // never
+				}
+			case B(_.iterator() => nodes):
+				switch (nodes.next()) {
+					case A(one):
+						switch (one) {
+							case Node(offset, tag):
+								var props = nodes.next();
+								var inner = switch (nodes.next()) {
+									case A(_): null;
+									case B(_.iterator() => inner): inner;
+								}
+								Node(offset, tag, () -> buildAst(props), () -> [for (ast in inner) buildAst(ast)]);
+							case Flat(offset):
+								var inner = switch (nodes.next()) {
+									case A(_): null;
+									case B(_.iterator() => inner): inner;
+								}
+								Flat(offset, () -> [for (ast in inner) buildAst(ast)]);
+							case _: null; // never
+						}
+					case _: null; // never
+				}
+		}
 	}
 }
 
@@ -280,7 +321,7 @@ class HxxAstException extends Exception {
 		}
 	}
 
-	public override function toString():String {
+	public override inline function toString():String {
 		return Type.getClassName(Type.getClass(this)) + ": " + message + " at line " + lineAt + " char " + charAt;
 	}
 }

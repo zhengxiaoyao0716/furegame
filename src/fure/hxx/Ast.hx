@@ -99,7 +99,7 @@ class Nodes {
 	public final arr:Array<Any>;
 
 	public inline function new(nodes:Array<Any>)
-		this.arr = nodes;
+		this.arr = nodes.flatMap(node -> Std.isOfType(node, Array) ? (node : Array<Any>) : [node]);
 
 	public static function flat(arr:Array<Any>):Array<Any>
 		return arr.flatMap(node -> Std.isOfType(node, Nodes) ? flat((node : Nodes).arr) : [node]);

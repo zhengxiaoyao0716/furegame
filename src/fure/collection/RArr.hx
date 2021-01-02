@@ -24,18 +24,19 @@ private typedef Builder = Array<Int>; // [index, size, rise]
 /**
  * recursion array
  *
- * raw    : [  A,  [  B,  [  C  ]  ],  [  [  D  ],  [  E,  F  ],  G ],  H  ]
- * index  : [  0      1      2               3         4   5      6     7  ]
- * length : [  4      2      1              3,3        2                   ]
- * riseAt : [         3      3              7 4        6                   ]
- * depth  : [       +1-0   +1-2            +2-1     +1-0   +0-1  +0-1      ]
+ * raw    : [  A,  [  B,  [  C  ]  ],  [ _ ],  [  [  D  ],  [  E,  F  ],  G ],  H  ]
+ * index  : [  0      1      2          (3)          4         5   6      7     8  ]
+ * length : [  4      2      1           0          3,3        2                   ]
+ * riseAt : [         3      3           4          8 5        7                   ]
+ * depth  : [       +1-0   +1-2         +-1        +2-1     +1-0   +0-1  +0-1      ]
  */
 @:allow(fure.collection.RArrIterator)
+@:using(fure.collection.RArr.RArr)
 class RArr<V> {
 	final data:Array<V> = [];
 	final mark:Map<Int, Mark> = [];
 	final stack:Array<Builder> = [];
-	var depth(default, null):Int = 0;
+	public var depth(default, null):Int = 0;
 
 	//#region builder
 	public function new() {
@@ -62,11 +63,15 @@ class RArr<V> {
 		if (builder[2] > 0)
 			trace('manually rised before auto rise, depth: $depth, dataLen: ${data.length}, riseCount: ${builder[2]}.');
 
-		if (mark.exists(builder[0]))
-			mark[builder[0]].unshift(builder[1]);
+		var index = builder[0];
+		var length = builder[1];
+		if (length == 0) data.push(null);
+		var riseAt = data.length;
+		if (mark.exists(index))
+			mark[index].unshift(length);
 		else
-			mark[builder[0]] = [builder[1]];
-		mark[builder[0]].unshift(data.length);
+			mark[index] = [length];
+		mark[index].unshift(riseAt);
 
 		return appendElement();
 	}
@@ -82,18 +87,11 @@ class RArr<V> {
 	public var length(get, never):Int;
 
 	public inline function get_length():Int {
-		requireClosed();
 		return stack[0][1];
 	}
 
 	public inline function flat():Array<V> {
-		requireClosed();
 		return data;
-	}
-
-	private inline function requireClosed():Void {
-		if (depth != 0)
-			throw new Exception('recursion array not closed, depth: ${depth}, dataLen: ${data.length}');
 	}
 
 	public inline function iterator():RArrIterator<V>
@@ -115,6 +113,7 @@ class RArr<V> {
 					rarr.push(one);
 				case B(_.toArray() => arr):
 					rarr.dive(arr.length);
+					if (arr.length == 0) rarr.rise();
 					vals = arr.concat(vals);
 			}
 		}
@@ -143,7 +142,7 @@ class RArrIterator<V> {
 
 	public var length(get, never):Int;
 
-	public function get_length():Int
+	private function get_length():Int
 		return markX == null ? rarr.stack[0][1] : rarr.mark[markX][markY + 1];
 
 	public inline function hasNext():Bool {
